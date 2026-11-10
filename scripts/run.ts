@@ -60,12 +60,11 @@ function viaServer(): Promise<"done" | "down"> {
 async function inProcess() {
   if (job === "ingest" || job === "full") {
     const { runIngest } = await import("../lib/ingest/run");
+    const { sendAlerts } = await import("../lib/cron");
+    // Same as the server route: every import is followed by alerts.
+    const ingest = await runIngest({ only: rest, full: job === "full" });
     console.log(
-      JSON.stringify(
-        await runIngest({ only: rest, full: job === "full" }),
-        null,
-        2,
-      ),
+      JSON.stringify({ ingest, alerts: await sendAlerts() }, null, 2),
     );
   } else if (job === "discover") {
     const { discoverBoards } = await import("../lib/ingest/discover");

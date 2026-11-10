@@ -15,12 +15,19 @@ export const STRIPE_PRODUCTS: Record<PlanId | "first_week", string> = {
 };
 
 /** The cancel-flow save offer: 50% off the next payment, once. */
-export const STRIPE_SAVE_COUPON = process.env.STRIPE_COUPON_SAVE50 ?? "ghostless_save50";
+export const STRIPE_SAVE_COUPON =
+  process.env.STRIPE_COUPON_SAVE50 ?? "ghostless_save50";
 
 /** Checkout form fields for a line item's product: the real product when we have it. */
-export function productFields(index: number, key: PlanId | "first_week", fallbackName: string): Record<string, string> {
+export function productFields(
+  index: number,
+  key: PlanId | "first_week",
+  fallbackName: string,
+): Record<string, string> {
   const id = STRIPE_PRODUCTS[key];
   return id
     ? { [`line_items[${index}][price_data][product]`]: id }
-    : { [`line_items[${index}][price_data][product_data][name]`]: fallbackName };
+    : {
+        [`line_items[${index}][price_data][product_data][name]`]: fallbackName,
+      };
 }

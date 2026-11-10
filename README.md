@@ -60,6 +60,12 @@ About 18,000 live UK roles, all straight from employers:
 
 `/admin` shows live roles per source, new today, and boards added each day.
 
+## Scheduled jobs (GitHub Actions)
+
+`.github/workflows/jobs.yml` runs the jobs, not Vercel: the Hobby plan allows only daily crons, and a full import runs longer than a Hobby function may. Every hour it imports and sends alerts (with a full Workable scan once a day). Daily, it discovers new boards and sends renewal reminders. Run any job by hand from the repo's Actions tab with "Run workflow".
+
+Repository secrets it needs: `DATABASE_URL` (the same hosted Postgres as the site), `SITE_URL`, `APP_SECRET`, `RESEND_API_KEY` and `EMAIL_FROM`, plus `STRIPE_SECRET_KEY`. Scheduled workflows only run on `main`, and GitHub pauses them after 60 days with no commits to the repo.
+
 ## How it fits together
 
 - `lib/ingest` reads Greenhouse, Lever and Ashby boards, keeps UK roles, closes ads that vanished, marks re-opened titles as reposts and rescores everything.
