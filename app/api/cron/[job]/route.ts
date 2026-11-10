@@ -3,8 +3,7 @@ import { discoverBoards } from "@/lib/ingest/discover";
 import { rescoreOpenJobs, runIngest } from "@/lib/ingest/run";
 import { clearStatsCache } from "@/lib/stats";
 
-// Vercel Hobby caps functions at 300s. Long jobs run on GitHub Actions; this route is for short manual runs.
-export const maxDuration = 300;
+// No maxDuration: the host's default applies. Long jobs run on GitHub Actions (.github/workflows/jobs.yml).
 
 /**
  * Scheduled jobs. Vercel Cron calls these with GET and the CRON_SECRET bearer;
