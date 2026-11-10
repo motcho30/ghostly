@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: #0b0b12;
+  --color-surface: #13131d;
+  --color-surface-2: #1b1b28;
+  --color-line: #2a2a3d;
+  --color-text: #f5f5fa;
+  --color-muted: #a3a3bb;
+  --color-faint: #6e6e88;
+  --color-mint: #6cf7b0;
+  --color-mint-deep: #1f6b4a;
+  --color-amber: #ffc65c;
+  --color-coral: #ff6b6b;
+  --color-violet: #a99bff;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #6cf7b055;
+}
+
+.glow {
+  background:
+    radial-gradient(60% 50% at 50% 0%, #a99bff22 0%, transparent 70%),
+    radial-gradient(40% 40% at 80% 10%, #6cf7b014 0%, transparent 70%);
+}
+
+.blurred {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.float {
+  animation: float 3.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .float,
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+input[type="range"] {
+  accent-color: var(--color-mint);
 }

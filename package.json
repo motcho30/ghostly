@@ -3,24 +3,37 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3007",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 3007",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && biome check",
+    "test": "tsx --test \"lib/**/*.test.ts\"",
+    "db:generate": "drizzle-kit generate",
+    "job": "tsx --env-file-if-exists=.env.local scripts/run.ts",
+    "ingest": "tsx --env-file-if-exists=.env.local scripts/run.ts ingest"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "drizzle-orm": "^0.45.4",
+    "lucide-react": "^1.70.0",
     "next": "16.4.6",
+    "postgres": "^3.4.9",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
     "@tailwindcss/turbopack": "4.3.3",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
     "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "packageManager": "pnpm@10.32.1"

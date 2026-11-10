@@ -1,0 +1,11 @@
+{
+  "note": "Not employers hiring for themselves: job aggregators, test boards and agencies the name filter misses. Matched on the employer name or board slug, ignoring case. Every source skips these.",
+  "names": [
+    "Jobs for Humanity",
+    "Dev",
+    "Test",
+    "Demo",
+    "SmartRecruiters",
+    "Workable"
+  ]
+}
