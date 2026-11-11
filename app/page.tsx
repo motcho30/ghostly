@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import {
+  ArrowRight,
   BellRing,
   Building2,
   CalendarClock,
@@ -17,6 +18,7 @@ import Link from "next/link";
 import { CtaLink, StickyCta, TrackView } from "@/components/client";
 import { GhostIcon } from "@/components/ghost";
 import { JobCard } from "@/components/job-card";
+import { LandingPopup } from "@/components/landing-popup";
 import { Eyebrow, Section, SiteFooter, SiteHeader } from "@/components/site";
 import { btn, card, cx } from "@/components/ui";
 import { BRAND } from "@/lib/brand";
@@ -64,28 +66,42 @@ export default async function Landing() {
           </span>
         </p>
         <h1 className="mx-auto mt-6 max-w-3xl text-[48px] font-semibold leading-[1.02] tracking-tight sm:text-[76px]">
-          Stop getting{" "}
-          <span className="font-serif font-normal italic text-mint">
-            ghosted
-          </span>
+          Apply{" "}
+          <span className="font-serif font-normal italic text-mint">first</span>
           .
+          <br />
+          Stop getting ghosted.
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-muted">
-          Applied to 100 jobs and heard nothing back? Most applications land in
-          a job's first few days, so by the time you find it on a job board,
-          you're often at the back of the pile. We send you new roles the hour
-          they go live on the company's own site.
+        <p className="mx-auto mt-5 max-w-xl text-[18px] leading-relaxed text-muted">
+          Applied to 100 jobs and heard nothing back? You're applying after
+          everyone else. We send you new roles the hour they go live on the
+          company's own site, so you're one of the first in.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <CtaLink
             href="/start"
             where="hero"
-            className={cx(btn.primary, "px-8 py-4 text-[16px]")}
+            className={cx(btn.primary, "py-4 pr-3 pl-8 text-[17px]")}
           >
             {BRAND.cta}
+            <span className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+              <ArrowRight className="h-4 w-4" />
+            </span>
           </CtaLink>
           <p className="text-[13px] text-faint">
             Free · About 2 minutes · No sign-up to see your matches
+          </p>
+          <p className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-line bg-surface-2 px-4 py-2 text-[13px] text-muted">
+            <span>
+              <span className="font-semibold text-text">
+                {fmt(stats.companies)}
+              </span>{" "}
+              employers hiring direct
+            </span>
+            <span className="text-faint">·</span>
+            <span>No recruiters, no agencies</span>
+            <span className="text-faint">·</span>
+            <span>Checked every hour</span>
           </p>
         </div>
 
@@ -442,6 +458,11 @@ export default async function Landing() {
       </Section>
 
       <SiteFooter />
+      <LandingPopup
+        fresh24={stats.fresh24}
+        liveRoles={stats.liveRoles}
+        href="/start"
+      />
       <StickyCta
         href="/start"
         label={BRAND.cta}
