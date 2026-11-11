@@ -53,7 +53,7 @@ export default async function JobPage({ params }: PageProps<"/app/jobs/[id]">) {
       )
       .limit(1),
   ]);
-  const salary = formatSalary(job.salaryMin, job.salaryMax);
+  const salary = formatSalary(job.salaryMin, job.salaryMax, job.currency);
   const closed = Boolean(job.closedAt);
 
   return (
@@ -134,7 +134,7 @@ export default async function JobPage({ params }: PageProps<"/app/jobs/[id]">) {
               <h3 className="font-semibold">{company.name} in numbers</h3>
               <dl className="mt-3 space-y-2">
                 <div className="flex justify-between">
-                  <dt className="text-muted">Live UK roles</dt>
+                  <dt className="text-muted">Live roles</dt>
                   <dd>{stats.open}</dd>
                 </div>
                 <div className="flex justify-between">

@@ -66,7 +66,8 @@ export function matchWhere(
   if (family) c.push(eq(jobs.family, family));
   else if (a.titleText?.trim())
     c.push(ilike(jobs.title, `%${escapeLike(a.titleText.trim())}%`));
-  if (a.city && a.city !== "Remote UK" && a.setting !== "remote") {
+  if (a.country) c.push(eq(jobs.country, a.country));
+  if (a.city && !a.city.startsWith("Remote") && a.setting !== "remote") {
     c.push(or(eq(jobs.city, a.city), eq(jobs.remote, "remote")));
   }
   return and(...c.filter(Boolean)) as SQL;
@@ -96,6 +97,8 @@ export type JobCardData = {
   ghostScore: number;
   ghostBand: "low" | "medium" | "high";
   ghostReasons?: GhostReason[];
+  country?: string;
+  currency?: string;
 };
 
 export const cardColumns = {
@@ -113,6 +116,8 @@ export const cardColumns = {
   ghostScore: jobs.ghostScore,
   ghostBand: jobs.ghostBand,
   ghostReasons: jobs.ghostReasons,
+  country: jobs.country,
+  currency: jobs.currency,
 };
 
 export const freshest = sql`coalesce(${jobs.postedAt}, ${jobs.firstSeenAt}) desc`;

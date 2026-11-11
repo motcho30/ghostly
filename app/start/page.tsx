@@ -5,10 +5,15 @@ import { redirect } from "next/navigation";
 import { Quiz } from "@/components/quiz";
 import { anonId } from "@/lib/cookies";
 import { assignArms, EXPERIMENTS } from "@/lib/experiments";
-import { UK_CITIES } from "@/lib/jobs/normalize";
+import { UK_CITIES, US_CITIES } from "@/lib/jobs/normalize";
 import { currentLead } from "@/lib/leads";
 import { screensFor } from "@/lib/quiz/config";
-import { familyChips, salaryHistogram, siteStats } from "@/lib/stats";
+import {
+  familyChips,
+  SALARY_SCALE,
+  salaryHistogram,
+  siteStats,
+} from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Get new roles first" };
@@ -31,17 +36,21 @@ export default async function StartPage({ searchParams }: PageProps<"/start">) {
     await anonId(),
     process.env.NODE_ENV === "production" ? {} : overrides,
   );
-  const [stats, hist, chips] = await Promise.all([
+  const [stats, histGB, histUS, chips] = await Promise.all([
     siteStats(),
-    salaryHistogram(),
+    salaryHistogram("GB"),
+    salaryHistogram("US"),
     familyChips(),
   ]);
 
-  // Hosting adds the visitor's city as a header; locally we fall back to London.
+  // Hosting adds the visitor's country and city as headers; locally we fall back to the UK and London.
   const h = await headers();
-  const ipCity = decodeURIComponent(h.get("x-vercel-ip-city") ?? "");
-  const city =
-    UK_CITIES.find((c) => c.toLowerCase() === ipCity.toLowerCase()) ?? "London";
+  const country = h.get("x-vercel-ip-country") === "US" ? "US" : "GB";
+  const ipCity = decodeURIComponent(
+    h.get("x-vercel-ip-city") ?? "",
+  ).toLowerCase();
+  const pick = (list: readonly string[], fallback: string) =>
+    list.find((c) => c.toLowerCase() === ipCity) ?? fallback;
 
   return (
     <Quiz
@@ -58,10 +67,22 @@ export default async function StartPage({ searchParams }: PageProps<"/start">) {
         highRiskPer100: stats.highRiskPer100,
         staleOver60: stats.staleOver60,
       }}
-      histogram={hist}
+      markets={{
+        GB: {
+          histogram: histGB,
+          cities: [...UK_CITIES.slice(0, 8), "Remote UK"],
+          defaultCity: pick(UK_CITIES, "London"),
+          scale: SALARY_SCALE.GB,
+        },
+        US: {
+          histogram: histUS,
+          cities: [...US_CITIES.slice(0, 10), "Remote US"],
+          defaultCity: pick(US_CITIES, "New York"),
+          scale: SALARY_SCALE.US,
+        },
+      }}
+      defaultCountry={country}
       chips={chips.slice(0, 12)}
-      cities={[...UK_CITIES.slice(0, 8), "Remote UK"]}
-      defaultCity={city}
     />
   );
 }

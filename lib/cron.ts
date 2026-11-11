@@ -54,6 +54,7 @@ export async function sendAlerts() {
         company: companies.name,
         salaryMin: jobs.salaryMin,
         salaryMax: jobs.salaryMax,
+        currency: jobs.currency,
         postedAt: jobs.postedAt,
         firstSeenAt: jobs.firstSeenAt,
       })
@@ -67,12 +68,12 @@ export async function sendAlerts() {
     const shown = fresh.slice(0, MAX_LISTED);
     const list = shown
       .map((r) => {
-        const pay = formatSalary(r.salaryMin, r.salaryMax);
+        const pay = formatSalary(r.salaryMin, r.salaryMax, r.currency);
         const when = timingOf(
           r.postedAt ?? r.firstSeenAt,
           now,
         ).when.toLowerCase();
-        return `<li style="margin:0 0 10px"><a style="color:#6cf7b0" href="${siteUrl()}/app/jobs/${r.id}">${esc(r.title)}</a><br><span style="color:#a0a0b8">${esc(r.company)}${pay ? ` · ${pay}` : ""} · ${when}</span></li>`;
+        return `<li style="margin:0 0 10px"><a style="color:#0f8a5f" href="${siteUrl()}/app/jobs/${r.id}">${esc(r.title)}</a><br><span style="color:#8a90a2">${esc(r.company)}${pay ? ` · ${pay}` : ""} · ${when}</span></li>`;
       })
       .join("");
     const n = more ? `${MAX_LISTED}+` : String(shown.length);
@@ -86,7 +87,7 @@ export async function sendAlerts() {
           : `${n} new role${plural} for you today`,
       html: layout(
         `${n} new role${plural} for you`,
-        `${p("Straight from the companies' own careers pages. Most people apply in a job's first few days, so the earlier you get in, the better.")}<ul style="padding-left:18px;color:#d6d6e4">${list}</ul>${button(`${siteUrl()}/app?posted=1`, "See them now")}`,
+        `${p("Straight from the companies' own careers pages. Most people apply in a job's first few days, so the earlier you get in, the better.")}<ul style="padding-left:18px;color:#3a3f52">${list}</ul>${button(`${siteUrl()}/app?posted=1`, "See them now")}`,
       ),
     });
     await db

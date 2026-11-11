@@ -15,7 +15,7 @@ const DOCS: Record<string, { title: string; sections: [string, string][] }> = {
     sections: [
       [
         "Who we are",
-        `${BRAND.name} sends job seekers new UK roles from companies' own careers pages soon after they go live, with when each was posted and whether it looks worth applying to. Contact: ${BRAND.supportEmail}.`,
+        `${BRAND.name} sends job seekers new UK and US roles from companies' own careers pages soon after they go live, with when each was posted and whether it looks worth applying to. Contact: ${BRAND.supportEmail}.`,
       ],
       [
         "What you get",

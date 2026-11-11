@@ -64,7 +64,7 @@ const SIGNS: [string, string][] = [
   ],
   [
     "Company's ads are mostly old",
-    "Half or more of the company's live UK ads are over 60 days old, when it has at least 5.",
+    "Half or more of the company's live ads are over 60 days old, when it has at least 5.",
   ],
   [
     "Members rarely hear back",

@@ -13,12 +13,15 @@ import { isExcludedEmployer } from "@/lib/ingest/excluded";
 import { scanWorkable } from "@/lib/ingest/workable";
 import { familyOf } from "@/lib/jobs/families";
 import {
+  CURRENCY,
   cityOf,
-  isUkLocation,
   levelOf,
+  type Market,
+  marketOf,
+  marketPlaces,
   normTitle,
+  parseSalary,
   remoteOf,
-  ukPlaces,
   workTypeOf,
 } from "@/lib/jobs/normalize";
 
@@ -37,6 +40,7 @@ const REPOST_WINDOW_DAYS = 120;
 const FULL_SCAN_HOURS = 20;
 /** The daily Workable scan covers ads posted in this many days. */
 const FULL_SCAN_DAYS = 30;
+const US_FULL_SCAN_DAYS = 14;
 /** Ads older than this are almost never a live opening, so we don't store them at all. */
 export const MAX_AGE_DAYS = 180;
 
@@ -206,7 +210,7 @@ export async function runIngest(
     }
     const uk = postings.filter(
       (p) =>
-        isUkLocation(p.locationText, p.country) &&
+        marketOf(p.locationText, p.country) !== null &&
         (p.known || p.descriptionText.length > 0) &&
         freshEnough(p, runStart),
     );
@@ -242,23 +246,35 @@ export async function runIngest(
       !lastAt ||
       Date.now() - lastAt.getTime() > FULL_SCAN_HOURS * 3_600_000;
     try {
-      const scan = await scanWorkable({
-        dayRange: full ? FULL_SCAN_DAYS : 2,
-        patient: full,
-      });
-      if (scan.rateLimited)
-        summary.failed.push(
-          `workable (rate limited after ${scan.pages} pages, kept what was read)`,
-        );
-      summary.workable = {
-        mode: full ? "full" : "recent",
-        pages: scan.pages,
-        seen: scan.postings.length,
-        new: 0,
-        closed: 0,
-        complete: scan.complete,
-        agenciesSkipped: scan.agenciesSkipped,
+      // Both countries. The US is much bigger, so its daily scan covers fewer days.
+      const plan = [
+        { location: "United Kingdom", cc: "GB", days: FULL_SCAN_DAYS },
+        { location: "United States", cc: "US", days: US_FULL_SCAN_DAYS },
+      ] as const;
+      const done: { cc: "GB" | "US"; complete: boolean }[] = [];
+      const scan = {
+        postings: [] as Posting[],
+        pages: 0,
+        complete: true,
+        agenciesSkipped: 0,
+        rateLimited: false,
       };
+      for (const c of plan) {
+        const one = await scanWorkable({
+          dayRange: full ? c.days : 2,
+          patient: full,
+          location: c.location,
+        });
+        scan.postings.push(...one.postings);
+        scan.pages += one.pages;
+        scan.agenciesSkipped += one.agenciesSkipped;
+        scan.complete &&= one.complete;
+        done.push({ cc: c.cc, complete: one.complete });
+        if (one.rateLimited) {
+          scan.rateLimited = true;
+          break;
+        }
+      }
       const byCompany = new Map<string, Posting[]>();
       for (const p of scan.postings) {
         const name = p.companyName ?? "Unknown";
@@ -274,20 +290,23 @@ export async function runIngest(
         const res = await storePostings(companyId, list, runStart);
         summary.workable.new += res.inserted;
       }
-      if (full && scan.complete) {
-        // A complete 30-day scan: anything not seen has been taken down, or is over 30 days old.
+      // A country's complete scan: anything there not seen was taken down, or aged out of the window.
+      for (const d of done.filter((x) => full && x.complete)) {
         const closed = await db
           .update(jobs)
           .set({ closedAt: runStart })
           .where(
             and(
               eq(jobs.source, "workable"),
+              eq(jobs.country, d.cc),
               isNull(jobs.closedAt),
               lt(jobs.lastSeenAt, runStart),
             ),
           )
           .returning({ id: jobs.id });
-        summary.workable.closed = closed.length;
+        summary.workable.closed += closed.length;
+      }
+      if (full && scan.complete) {
         await setState("workable_full", {
           at: runStart.toISOString(),
           seen: scan.postings.length,
@@ -449,6 +468,14 @@ async function storePostings(
     const nt = normTitle(p.title);
     const isNew = !known.has(`${p.source}:${p.sourceId}`);
     if (isNew) inserted++;
+    const market: Market = marketOf(p.locationText, p.country) ?? "GB";
+    const currency = CURRENCY[market];
+    // A salary only counts in the market's own currency: a $ figure on a UK ad is usually a US range.
+    const salary =
+      p.salary && (p.salary.currency ?? "GBP") === currency
+        ? p.salary
+        : parseSalary(p.descriptionText, currency);
+    const places = marketPlaces(p.locationText, market);
     return {
       companyId,
       source: p.source,
@@ -458,12 +485,14 @@ async function storePostings(
       family: familyOf(p.title),
       level: levelOf(p.title),
       workType: workTypeOf(p.title, p.workTypeHint),
-      locationText: ukPlaces(p.locationText).slice(0, 300),
-      city: cityOf(ukPlaces(p.locationText)),
+      locationText: places.slice(0, 300),
+      city: cityOf(places, market),
+      country: market,
+      currency,
       remote: remoteOf(p.locationText, p.descriptionText, p.remoteHint),
-      salaryMin: p.salary?.min ?? null,
-      salaryMax: p.salary?.max ?? null,
-      salaryText: p.salary?.text || null,
+      salaryMin: salary?.min ?? null,
+      salaryMax: salary?.max ?? null,
+      salaryText: salary?.text || null,
       descriptionText: p.descriptionText,
       applyUrl: p.applyUrl,
       postedAt: p.postedAt,
@@ -488,6 +517,8 @@ async function storePostings(
           workType: sql`excluded.work_type`,
           locationText: sql`excluded.location_text`,
           city: sql`excluded.city`,
+          country: sql`excluded.country`,
+          currency: sql`excluded.currency`,
           remote: sql`excluded.remote`,
           salaryMin: sql`excluded.salary_min`,
           salaryMax: sql`excluded.salary_max`,

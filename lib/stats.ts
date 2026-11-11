@@ -30,6 +30,8 @@ async function cached<T>(
 
 export type SiteStats = QuizStats & {
   fresh48: number;
+  liveGB: number;
+  liveUS: number;
   medianAgeDays: number;
   lastIngestAt: Date | null;
 };
@@ -41,6 +43,8 @@ export function siteStats(): Promise<SiteStats> {
     const [r] = await db
       .select({
         live: sql<number>`count(*)::int`,
+        liveGB: sql<number>`count(*) filter (where ${jobs.country} = 'GB')::int`,
+        liveUS: sql<number>`count(*) filter (where ${jobs.country} = 'US')::int`,
         companies: sql<number>`count(distinct ${jobs.companyId})::int`,
         fresh24: sql<number>`count(*) filter (where ${age} <= 1)::int`,
         fresh7: sql<number>`count(*) filter (where ${age} <= 7)::int`,
@@ -60,6 +64,8 @@ export function siteStats(): Promise<SiteStats> {
       .limit(1);
     return {
       liveRoles: r.live,
+      liveGB: r.liveGB,
+      liveUS: r.liveUS,
       companies: r.companies,
       fresh24: r.fresh24,
       fresh7: r.fresh7,
@@ -76,16 +82,30 @@ export function siteStats(): Promise<SiteStats> {
 }
 
 /** Salaries in live ads, in £5k buckets from £20k to £150k, for the quiz slider. */
-export function salaryHistogram(): Promise<number[]> {
-  return cached("hist", 30 * 60_000, async () => {
+/** Salary range and bucket size of the quiz slider, per market. */
+export const SALARY_SCALE = {
+  GB: { min: 20_000, max: 150_000, step: 5_000, start: 45_000, sym: "£" },
+  US: { min: 30_000, max: 290_000, step: 10_000, start: 90_000, sym: "$" },
+} as const;
+
+/** Salaries in live ads, in 26 buckets across the market's slider range. */
+export function salaryHistogram(market: "GB" | "US" = "GB"): Promise<number[]> {
+  const sc = SALARY_SCALE[market];
+  return cached(`hist:${market}`, 30 * 60_000, async () => {
     const db = await getDb();
     const rows = await db
       .select({
-        b: sql<number>`width_bucket((${jobs.salaryMin} + coalesce(${jobs.salaryMax}, ${jobs.salaryMin})) / 2, 20000, 150000, 26)::int`,
+        b: sql<number>`width_bucket((${jobs.salaryMin} + coalesce(${jobs.salaryMax}, ${jobs.salaryMin})) / 2, ${sc.min}, ${sc.max}, 26)::int`,
         n: sql<number>`count(*)::int`,
       })
       .from(jobs)
-      .where(and(isNull(jobs.closedAt), isNotNull(jobs.salaryMin)))
+      .where(
+        and(
+          isNull(jobs.closedAt),
+          isNotNull(jobs.salaryMin),
+          eq(jobs.country, market),
+        ),
+      )
       .groupBy(sql`1`);
     const out = new Array(26).fill(0);
     for (const r of rows) if (r.b >= 1 && r.b <= 26) out[r.b - 1] = r.n;

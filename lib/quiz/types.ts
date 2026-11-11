@@ -18,6 +18,8 @@ export type Answers = {
   titleText?: string;
   pains?: Record<string, boolean>;
   city?: string;
+  /** "GB" or "US". */
+  country?: "GB" | "US";
 };
 
 export type Option = {

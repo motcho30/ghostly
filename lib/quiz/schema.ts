@@ -20,6 +20,7 @@ export const AnswersSchema = z.object({
   titleText: z.string().max(80).optional(),
   pains: z.record(z.string().max(20), z.boolean()).optional(),
   city: z.string().max(60).optional(),
+  country: z.enum(["GB", "US"]).optional(),
 }) satisfies z.ZodType<Answers>;
 
 export function decodeAnswers(param: string | null): Answers {

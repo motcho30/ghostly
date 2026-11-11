@@ -7,7 +7,12 @@ import type { Answers } from "./types";
 export type Segment = "senior" | "urgent" | "switcher" | "casual";
 
 export function segmentOf(a: Answers): Segment {
-  if (a.level === "director" || a.level === "lead" || (a.salary ?? 0) >= 80_000)
+  const seniorPay = a.country === "US" ? 150_000 : 80_000;
+  if (
+    a.level === "director" ||
+    a.level === "lead" ||
+    (a.salary ?? 0) >= seniorPay
+  )
     return "senior";
   const longSearch = a.searching === "3_6" || a.searching === "6_plus";
   if (a.status === "out_of_work" || (longSearch && a.start === "asap"))

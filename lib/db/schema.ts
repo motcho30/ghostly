@@ -66,6 +66,10 @@ export const jobs = pgTable(
     locationText: text("location_text"),
     city: text("city"),
     remote: text("remote").$type<Remote>().notNull(),
+    /** "GB" or "US". */
+    country: text("country").notNull().default("GB"),
+    /** Currency of salaryMin and salaryMax: "GBP" or "USD". */
+    currency: text("currency").notNull().default("GBP"),
     salaryMin: integer("salary_min"),
     salaryMax: integer("salary_max"),
     salaryText: text("salary_text"),
@@ -91,6 +95,7 @@ export const jobs = pgTable(
     uniqueIndex("jobs_source_uq").on(t.source, t.sourceId),
     index("jobs_company_idx").on(t.companyId),
     index("jobs_open_idx").on(t.closedAt, t.family),
+    index("jobs_market_idx").on(t.country, t.closedAt),
   ],
 );
 

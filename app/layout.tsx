@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     template: `%s · ${BRAND.name}`,
   },
   description:
-    "New UK roles the hour they go live on the company's own careers page, so you're one of the first to apply. Stop applying into silence.",
+    "New UK and US roles the hour they go live on the company's own careers page, so you're one of the first to apply. Stop applying into silence.",
   openGraph: { siteName: BRAND.name, type: "website" },
   twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0b12",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };

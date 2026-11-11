@@ -38,7 +38,7 @@ export default async function CheckPage() {
         </div>
         <div className="mt-8 grid grid-cols-3 gap-3 text-center">
           {[
-            [fmt(stats.liveRoles), "live UK ads tracked"],
+            [fmt(stats.liveRoles), "live ads tracked, UK and US"],
             [fmt(stats.fresh24), "new roles in the last 24 hours"],
             [`${stats.medianAgeDays} days`, "typical ad age"],
           ].map(([n, l]) => (

@@ -1,5 +1,5 @@
 {
-  "note": "Seed list of public careers boards (Greenhouse, Lever, Ashby, SmartRecruiters). The daily discovery job adds more to the database, and Workable is read whole through its public UK search, so neither needs editing here.",
+  "note": "Seed list of public careers boards (Greenhouse, Lever, Ashby, SmartRecruiters) for UK and US employers. The daily discovery job adds more to the database, and Workable is read whole through its public UK and US search.",
   "boards": [
     {
       "ats": "greenhouse",
@@ -1035,6 +1035,506 @@
       "ats": "smartrecruiters",
       "slug": "wise",
       "name": "Wise"
+    },
+    {
+      "ats": "ashby",
+      "slug": "1password",
+      "name": "1Password"
+    },
+    {
+      "ats": "ashby",
+      "slug": "airbyte",
+      "name": "Airbyte"
+    },
+    {
+      "ats": "ashby",
+      "slug": "alchemy",
+      "name": "Alchemy"
+    },
+    {
+      "ats": "ashby",
+      "slug": "amplitude",
+      "name": "Amplitude"
+    },
+    {
+      "ats": "ashby",
+      "slug": "andela",
+      "name": "Andela"
+    },
+    {
+      "ats": "ashby",
+      "slug": "angi",
+      "name": "Angi"
+    },
+    {
+      "ats": "ashby",
+      "slug": "ashby",
+      "name": "Ashby"
+    },
+    {
+      "ats": "ashby",
+      "slug": "benchling",
+      "name": "Benchling"
+    },
+    {
+      "ats": "ashby",
+      "slug": "character",
+      "name": "Character.AI"
+    },
+    {
+      "ats": "ashby",
+      "slug": "circle",
+      "name": "Circle"
+    },
+    {
+      "ats": "ashby",
+      "slug": "clerk",
+      "name": "Clerk"
+    },
+    {
+      "ats": "ashby",
+      "slug": "dapper",
+      "name": "Dapper Labs"
+    },
+    {
+      "ats": "ashby",
+      "slug": "deliveroo",
+      "name": "Deliveroo"
+    },
+    {
+      "ats": "ashby",
+      "slug": "fullstory",
+      "name": "FullStory"
+    },
+    {
+      "ats": "ashby",
+      "slug": "hex",
+      "name": "Hex"
+    },
+    {
+      "ats": "ashby",
+      "slug": "improbable",
+      "name": "Improbable"
+    },
+    {
+      "ats": "ashby",
+      "slug": "insitro",
+      "name": "insitro"
+    },
+    {
+      "ats": "ashby",
+      "slug": "iterable",
+      "name": "Iterable"
+    },
+    {
+      "ats": "ashby",
+      "slug": "klaviyo",
+      "name": "Klaviyo"
+    },
+    {
+      "ats": "ashby",
+      "slug": "miro",
+      "name": "Miro"
+    },
+    {
+      "ats": "ashby",
+      "slug": "modal",
+      "name": "Modal"
+    },
+    {
+      "ats": "ashby",
+      "slug": "novo",
+      "name": "Novo"
+    },
+    {
+      "ats": "ashby",
+      "slug": "pinecone",
+      "name": "Pinecone"
+    },
+    {
+      "ats": "ashby",
+      "slug": "plaid",
+      "name": "Plaid"
+    },
+    {
+      "ats": "ashby",
+      "slug": "quora",
+      "name": "Quora"
+    },
+    {
+      "ats": "ashby",
+      "slug": "snowflake",
+      "name": "Snowflake"
+    },
+    {
+      "ats": "ashby",
+      "slug": "snyk",
+      "name": "Snyk"
+    },
+    {
+      "ats": "ashby",
+      "slug": "substack",
+      "name": "Substack"
+    },
+    {
+      "ats": "ashby",
+      "slug": "thumbtack",
+      "name": "Thumbtack"
+    },
+    {
+      "ats": "ashby",
+      "slug": "truelayer",
+      "name": "TrueLayer"
+    },
+    {
+      "ats": "ashby",
+      "slug": "watershed",
+      "name": "Watershed"
+    },
+    {
+      "ats": "ashby",
+      "slug": "weaviate",
+      "name": "Weaviate"
+    },
+    {
+      "ats": "ashby",
+      "slug": "webflow",
+      "name": "Webflow"
+    },
+    {
+      "ats": "ashby",
+      "slug": "zapier",
+      "name": "Zapier"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "affirm",
+      "name": "Affirm"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "archer",
+      "name": "Archer Aviation"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "attentive",
+      "name": "Attentive"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "axios",
+      "name": "Axios"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "bird",
+      "name": "Bird"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "bitwarden",
+      "name": "Bitwarden"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "bloomreach",
+      "name": "Bloomreach"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "braze",
+      "name": "Braze"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "calm",
+      "name": "Calm"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "carvana",
+      "name": "Carvana"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "chargepoint",
+      "name": "ChargePoint"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "checkr",
+      "name": "Checkr"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "chime",
+      "name": "Chime"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "cleo",
+      "name": "Cleo"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "consensys",
+      "name": "Consensys"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "doordashusa",
+      "name": "DoorDash"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "duolingo",
+      "name": "Duolingo"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "faire",
+      "name": "Faire"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "fastly",
+      "name": "Fastly"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "fireblocks",
+      "name": "Fireblocks"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "fivetran",
+      "name": "Fivetran"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "gemini",
+      "name": "Gemini"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "glossier",
+      "name": "Glossier"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "grafanalabs",
+      "name": "Grafana Labs"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "greenhouse",
+      "name": "Greenhouse"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "gusto",
+      "name": "Gusto"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "instacart",
+      "name": "Instacart"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "justworks",
+      "name": "Justworks"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "labelbox",
+      "name": "Labelbox"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "lattice",
+      "name": "Lattice"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "launchdarkly",
+      "name": "LaunchDarkly"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "medium",
+      "name": "Medium"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "mercury",
+      "name": "Mercury"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "mixpanel",
+      "name": "Mixpanel"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "motional",
+      "name": "Motional"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "netlify",
+      "name": "Netlify"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "newrelic",
+      "name": "New Relic"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "nextdoor",
+      "name": "Nextdoor"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "nuro",
+      "name": "Nuro"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "pagerduty",
+      "name": "PagerDuty"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "peloton",
+      "name": "Peloton"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "pinterest",
+      "name": "Pinterest"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "ramp",
+      "name": "Ramp"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "relativity",
+      "name": "Relativity Space"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "remote",
+      "name": "Remote"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "riotgames",
+      "name": "Riot Games"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "roblox",
+      "name": "Roblox"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "rocketlab",
+      "name": "Rocket Lab"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "spacex",
+      "name": "SpaceX"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "squarespace",
+      "name": "Squarespace"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "sterling",
+      "name": "Sterling"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "stockx",
+      "name": "StockX"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "sumologic",
+      "name": "Sumo Logic"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "sweetgreen",
+      "name": "Sweetgreen"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "tanium",
+      "name": "Tanium"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "taskrabbit",
+      "name": "Taskrabbit"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "toast",
+      "name": "Toast"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "twitch",
+      "name": "Twitch"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "upwork",
+      "name": "Upwork"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "veracyte",
+      "name": "Veracyte"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "vercel",
+      "name": "Vercel"
+    },
+    {
+      "ats": "lever",
+      "slug": "anchorage",
+      "name": "Anchorage Digital"
+    },
+    {
+      "ats": "lever",
+      "slug": "arcadia",
+      "name": "Arcadia"
+    },
+    {
+      "ats": "lever",
+      "slug": "ro",
+      "name": "Ro"
+    },
+    {
+      "ats": "lever",
+      "slug": "shieldai",
+      "name": "Shield AI"
+    },
+    {
+      "ats": "lever",
+      "slug": "zoox",
+      "name": "Zoox"
     }
   ]
 }

@@ -9,7 +9,7 @@ import { requireMember } from "@/lib/auth";
 import { getDb, schema } from "@/lib/db";
 import { fmt } from "@/lib/format";
 import { FAMILIES } from "@/lib/jobs/families";
-import { UK_CITIES } from "@/lib/jobs/normalize";
+import { CITIES } from "@/lib/jobs/normalize";
 import { answersOf, leadById } from "@/lib/leads";
 import { feed } from "@/lib/match";
 import type { Answers, Setting } from "@/lib/quiz/types";
@@ -38,7 +38,20 @@ export default async function Feed({ searchParams }: PageProps<"/app">) {
     city: one(sp.city) ?? base.city,
     setting: (one(sp.setting) as Setting) ?? base.setting,
     salary: one(sp.salary) ? Number(one(sp.salary)) || undefined : base.salary,
+    country:
+      one(sp.country) === "US"
+        ? "US"
+        : one(sp.country) === "GB"
+          ? "GB"
+          : (base.country ?? "GB"),
   };
+  // Switching country drops the other country's city and salary.
+  if (one(sp.country) && one(sp.country) !== (base.country ?? "GB")) {
+    if (!one(sp.city)) a.city = undefined;
+    if (!one(sp.salary)) a.salary = undefined;
+  }
+  const market = a.country ?? "GB";
+  const sym = market === "US" ? "$" : "£";
   if (one(sp.family) === "all") {
     a.family = undefined;
     a.titleText = undefined;
@@ -101,13 +114,24 @@ export default async function Feed({ searchParams }: PageProps<"/app">) {
             ))}
           </select>
           <select
+            name="country"
+            defaultValue={market}
+            className={select}
+            aria-label="Country"
+          >
+            <option value="GB">United Kingdom</option>
+            <option value="US">United States</option>
+          </select>
+          <select
             name="city"
             defaultValue={a.city ?? "anywhere"}
             className={select}
             aria-label="City"
           >
-            <option value="anywhere">Anywhere in the UK</option>
-            {UK_CITIES.map((c) => (
+            <option value="anywhere">
+              Anywhere in {market === "US" ? "the US" : "the UK"}
+            </option>
+            {CITIES[market].map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
@@ -133,21 +157,17 @@ export default async function Feed({ searchParams }: PageProps<"/app">) {
             <option value="">Any salary</option>
             {[
               ...new Set([
-                30,
-                40,
-                50,
-                60,
-                75,
-                90,
-                110,
-                130,
+                ...(market === "US"
+                  ? [50, 75, 100, 125, 150, 175, 200, 250]
+                  : [30, 40, 50, 60, 75, 90, 110, 130]),
                 ...(a.salary ? [Math.round(a.salary / 1000)] : []),
               ]),
             ]
               .sort((x, y) => x - y)
               .map((k) => (
                 <option key={k} value={k * 1000}>
-                  £{k}k+
+                  {sym}
+                  {k}k+
                 </option>
               ))}
           </select>

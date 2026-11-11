@@ -17,7 +17,10 @@ export function siteUrl(): string {
 
 export const flags = {
   stripe: () => Boolean(process.env.STRIPE_SECRET_KEY),
-  email: () => Boolean(process.env.RESEND_API_KEY),
+  /** Off until EMAIL_SENDING_ENABLED is "true" and a Resend key is set. Emails are still kept in the outbox. */
+  email: () =>
+    process.env.EMAIL_SENDING_ENABLED === "true" &&
+    Boolean(process.env.RESEND_API_KEY),
   devTools: () =>
     process.env.NODE_ENV !== "production" ||
     process.env.DEV_TOOLS_ENABLED === "true",

@@ -135,7 +135,7 @@ export default async function Account({
         <div className="mt-3">
           <ShareButtons
             url={link}
-            text="Stop getting ghosted. This sends you new UK roles the hour they go live:"
+            text="Stop getting ghosted. This sends you new UK and US roles the hour they go live:"
             event="referral_share"
           />
         </div>

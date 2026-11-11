@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { SiteHeader } from "@/components/site";
 import { btn, card, cx, input } from "@/components/ui";
-import { flags } from "@/lib/brand";
+import { BRAND, flags } from "@/lib/brand";
 import { requestLink } from "./actions";
 
 export const metadata: Metadata = { title: "Log in" };
@@ -47,6 +47,12 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
               <p className="mt-2 text-[15px] text-muted">
                 No passwords. We email you a link.
               </p>
+              {!flags.email() && !flags.devTools() && (
+                <p className="mt-2 rounded-xl border border-amber/40 bg-amber/10 p-3 text-[13px] text-amber">
+                  Sign-in emails are paused for now. Use the device you signed
+                  up on, or contact {BRAND.supportEmail}.
+                </p>
+              )}
               <form action={requestLink} className="mt-5">
                 <input
                   name="email"

@@ -39,7 +39,8 @@ export function loadBoards(): Board[] {
   return file.boards;
 }
 
-const MAX_TEXT = 12_000;
+// Enough for the verdict and the job page; full ads stay one click away on the company site.
+const MAX_TEXT = 6_000;
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url, {
@@ -130,9 +131,14 @@ async function lever(slug: string): Promise<Posting[]> {
     const sr = j.salaryRange;
     const structured: Salary | null =
       sr?.min &&
-      sr.currency === "GBP" &&
+      (sr.currency === "GBP" || sr.currency === "USD") &&
       (sr.interval ?? "per-year-salary").includes("year")
-        ? { min: sr.min, max: sr.max ?? sr.min, text: "" }
+        ? {
+            min: sr.min,
+            max: sr.max ?? sr.min,
+            text: "",
+            currency: sr.currency,
+          }
         : null;
     return {
       source: "lever",
@@ -196,11 +202,13 @@ async function ashby(slug: string): Promise<Posting[]> {
         ]
           .filter(Boolean)
           .join("; "),
-        // Ashby writes the country in full ("United Kingdom"); only trust it when it is the UK.
+        // Ashby writes the country in full ("United Kingdom", "United States").
         country:
           country && /united kingdom|great britain|^uk$/i.test(country)
             ? "GB"
-            : null,
+            : country && /united states|^usa?$/i.test(country)
+              ? "US"
+              : null,
         remoteHint: j.workplaceType ?? null,
         workTypeHint: j.employmentType ?? null,
         salary: parseSalary(comp) ?? parseSalary(text),
@@ -239,45 +247,51 @@ async function smartrecruiters(
 ): Promise<Posting[]> {
   const out: Posting[] = [];
   const base = `https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(slug)}/postings`;
-  for (let offset = 0, page = 0; page < 50; page++) {
-    const data = await getJson<{ content?: SrRow[]; totalFound?: number }>(
-      `${base}?country=gb&limit=100&offset=${offset}`,
-    );
-    const rows = data.content ?? [];
-    for (const r of rows) {
-      const isKnown = known.has(r.id);
-      let text = "";
-      let applyUrl = `https://jobs.smartrecruiters.com/${slug}/${r.id}`;
-      if (!isKnown) {
-        const d = await getJson<SrDetail>(`${base}/${r.id}`).catch(() => null);
-        text = htmlToText(
-          Object.values(d?.jobAd?.sections ?? {})
-            .map((s) => s.text ?? "")
-            .join("\n\n"),
-        ).slice(0, MAX_TEXT);
-        if (d?.applyUrl) applyUrl = d.applyUrl;
-        if (!text) continue;
+  // UK and US roles, one country at a time, so each ad keeps its country.
+  for (const cc of ["gb", "us"] as const) {
+    for (let offset = 0, page = 0; page < 50; page++) {
+      const data = await getJson<{ content?: SrRow[]; totalFound?: number }>(
+        `${base}?country=${cc}&limit=100&offset=${offset}`,
+      );
+      const rows = data.content ?? [];
+      for (const r of rows) {
+        const isKnown = known.has(r.id);
+        let text = "";
+        let applyUrl = `https://jobs.smartrecruiters.com/${slug}/${r.id}`;
+        if (!isKnown) {
+          const d = await getJson<SrDetail>(`${base}/${r.id}`).catch(
+            () => null,
+          );
+          text = htmlToText(
+            Object.values(d?.jobAd?.sections ?? {})
+              .map((s) => s.text ?? "")
+              .join("\n\n"),
+          ).slice(0, MAX_TEXT);
+          if (d?.applyUrl) applyUrl = d.applyUrl;
+          if (!text) continue;
+        }
+        const loc = r.location ?? {};
+        const countryName = cc === "gb" ? "United Kingdom" : "United States";
+        out.push({
+          source: "smartrecruiters",
+          sourceId: r.id,
+          title: r.name.trim(),
+          locationText:
+            loc.fullLocation ||
+            [loc.city, countryName].filter(Boolean).join(", "),
+          country: cc === "gb" ? "GB" : "US",
+          remoteHint: loc.remote ? "remote" : loc.hybrid ? "hybrid" : null,
+          workTypeHint: r.typeOfEmployment?.label ?? null,
+          salary: text ? parseSalary(text, cc === "gb" ? "GBP" : "USD") : null,
+          descriptionText: text,
+          applyUrl,
+          postedAt: date(r.releasedDate),
+          known: isKnown,
+        });
       }
-      const loc = r.location ?? {};
-      out.push({
-        source: "smartrecruiters",
-        sourceId: r.id,
-        title: r.name.trim(),
-        locationText:
-          loc.fullLocation ||
-          [loc.city, "United Kingdom"].filter(Boolean).join(", "),
-        country: "GB",
-        remoteHint: loc.remote ? "remote" : loc.hybrid ? "hybrid" : null,
-        workTypeHint: r.typeOfEmployment?.label ?? null,
-        salary: text ? parseSalary(text) : null,
-        descriptionText: text,
-        applyUrl,
-        postedAt: date(r.releasedDate),
-        known: isKnown,
-      });
+      offset += rows.length;
+      if (!rows.length || offset >= (data.totalFound ?? 0)) break;
     }
-    offset += rows.length;
-    if (!rows.length || offset >= (data.totalFound ?? 0)) break;
   }
   return out;
 }

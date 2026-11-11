@@ -1,25 +1,26 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-bg: #0b0b12;
-  --color-surface: #13131d;
-  --color-surface-2: #1b1b28;
-  --color-line: #2a2a3d;
-  --color-text: #f5f5fa;
-  --color-muted: #a3a3bb;
-  --color-faint: #6e6e88;
-  --color-mint: #6cf7b0;
-  --color-mint-deep: #1f6b4a;
-  --color-amber: #ffc65c;
-  --color-coral: #ff6b6b;
-  --color-violet: #a99bff;
+  /* Light and calm: white page, soft grey cards, one confident green. */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f5f6f8;
+  --color-line: #e4e6eb;
+  --color-text: #0f1222;
+  --color-muted: #555b6e;
+  --color-faint: #8a90a2;
+  --color-mint: #0f8a5f;
+  --color-mint-deep: #0b6b4a;
+  --color-amber: #b45309;
+  --color-coral: #c62828;
+  --color-violet: #5b47e0;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-serif);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -34,13 +35,13 @@ body {
 }
 
 ::selection {
-  background: #6cf7b055;
+  background: #0f8a5f33;
 }
 
 .glow {
   background:
-    radial-gradient(60% 50% at 50% 0%, #a99bff22 0%, transparent 70%),
-    radial-gradient(40% 40% at 80% 10%, #6cf7b014 0%, transparent 70%);
+    radial-gradient(70% 45% at 50% 0%, #eef3ff 0%, transparent 70%),
+    radial-gradient(40% 35% at 85% 5%, #e8f7f0 0%, transparent 70%);
 }
 
 .blurred {

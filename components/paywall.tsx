@@ -423,7 +423,7 @@ export function Paywall(p: Props) {
 
       {laterOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-label="Offer"

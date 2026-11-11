@@ -21,8 +21,8 @@ export async function generateMetadata({
   const c = await companyBySlug((await params).slug);
   if (!c) return { title: "Company" };
   return {
-    title: `Does ${c.name} reply? New UK roles and reply rates`,
-    description: `${c.open} live UK roles at ${c.name}. Typical ad is ${c.medianAgeDays} days old. See which ones are fresh before you apply.`,
+    title: `Does ${c.name} reply? New roles and reply rates`,
+    description: `${c.open} live roles at ${c.name}. Typical ad is ${c.medianAgeDays} days old. See which ones are fresh before you apply.`,
   };
 }
 
@@ -56,7 +56,7 @@ export default async function CompanyPage({
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            [String(c.open), "live UK roles"],
+            [String(c.open), "live roles"],
             [`${c.medianAgeDays} days`, "typical ad age"],
             [
               `${Math.round(c.over60Share * 100)} in 100`,

@@ -14,7 +14,7 @@ const RATE_LIMIT_WAIT_MS = 30_000;
 
 export class WorkableRateLimited extends Error {}
 const SEARCH = "https://jobs.workable.com/api/v1/jobs";
-const MAX_TEXT = 12_000;
+const MAX_TEXT = 6_000;
 
 /** Recruitment firms post on Workable too. We only list employers hiring for themselves. */
 export const AGENCY_NAME =
@@ -41,15 +41,20 @@ function toPosting(j: WorkableJob): Posting | null {
   if (!j.id || !j.title || !name || !j.url) return null;
   if (j.state && j.state !== "published") return null;
   if (AGENCY_NAME.test(name)) return null;
-  const country = j.location?.countryName ?? "";
-  if (!/united kingdom|great britain/i.test(country)) return null;
+  const countryName = j.location?.countryName ?? "";
+  const country = /united kingdom|great britain/i.test(countryName)
+    ? "GB"
+    : /united states/i.test(countryName)
+      ? "US"
+      : null;
+  if (!country) return null;
   const text = htmlToText(
     [j.description, j.requirementsSection, j.benefitsSection]
       .filter(Boolean)
       .join("\n"),
   ).slice(0, MAX_TEXT);
   if (!text) return null;
-  const loc = [j.location?.city, j.location?.subregion, "United Kingdom"]
+  const loc = [j.location?.city, j.location?.subregion, countryName]
     .filter(Boolean)
     .join(", ");
   return {
@@ -57,7 +62,7 @@ function toPosting(j: WorkableJob): Posting | null {
     sourceId: j.id,
     title: j.title.trim(),
     locationText: loc,
-    country: "GB",
+    country,
     remoteHint: j.workplace ?? null,
     workTypeHint: j.employmentType ?? null,
     salary: parseSalary(text),
@@ -102,7 +107,12 @@ async function page(
  * were not seen.
  */
 export async function scanWorkable(
-  opts: { dayRange?: number; maxPages?: number; patient?: boolean } = {},
+  opts: {
+    dayRange?: number;
+    maxPages?: number;
+    patient?: boolean;
+    location?: "United Kingdom" | "United States";
+  } = {},
 ): Promise<{
   postings: Posting[];
   pages: number;
@@ -116,7 +126,9 @@ export async function scanWorkable(
   let agenciesSkipped = 0;
   const maxPages = opts.maxPages ?? 700;
   while (pages < maxPages) {
-    const params = new URLSearchParams({ location: "United Kingdom" });
+    const params = new URLSearchParams({
+      location: opts.location ?? "United Kingdom",
+    });
     if (opts.dayRange) params.set("day_range", String(opts.dayRange));
     if (token) params.set("pageToken", token);
     let data: Awaited<ReturnType<typeof page>>;

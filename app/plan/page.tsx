@@ -6,7 +6,7 @@ import { currentUser, hasAccess } from "@/lib/auth";
 import { BRAND } from "@/lib/brand";
 import { track } from "@/lib/events";
 import { familyLabel } from "@/lib/jobs/families";
-import { formatSalary } from "@/lib/jobs/normalize";
+import { formatSalary, MARKET_NAME } from "@/lib/jobs/normalize";
 import {
   answersOf,
   currentLead,
@@ -43,6 +43,7 @@ const settingLabel: Record<string, string> = {
 function segmentCopy(
   segment: Segment,
   salary: number | undefined,
+  sym: string,
   fresh48: number,
 ) {
   const weekly = salary ? Math.round(salary / 52) : null;
@@ -51,7 +52,7 @@ function segmentCopy(
       return {
         headline: "Stop getting ghosted.",
         line: weekly
-          ? `Three more weeks of silence is about £${(weekly * 3).toLocaleString("en-GB")} of your target pay. Get new roles the hour they go live and be one of the first to apply.`
+          ? `Three more weeks of silence is about ${sym}${(weekly * 3).toLocaleString("en-GB")} of your target pay. Get new roles the hour they go live and be one of the first to apply.`
           : "Get new roles the hour they go live and be one of the first to apply.",
       };
     case "switcher":
@@ -90,12 +91,13 @@ export default async function PlanPage() {
   ]);
   const fam = familyFor(a);
   const title = fam ? familyLabel(fam) : a.titleText || "matching";
+  const sym = a.country === "US" ? "$" : "£";
   const place =
     a.setting === "remote" || a.city === "Remote UK"
-      ? "across the UK"
+      ? `across ${MARKET_NAME[a.country ?? "GB"]}`
       : `in or near ${a.city ?? "the UK"}`;
   const firstPain = Object.entries(a.pains ?? {}).find(([, yes]) => yes)?.[0];
-  const copy = segmentCopy(lead.segment as Segment, a.salary, fresh48);
+  const copy = segmentCopy(lead.segment as Segment, a.salary, sym, fresh48);
   const now = new Date();
   const offers = PLANS.map((p) => leadOffer(lead, p.id, now));
 
@@ -119,7 +121,7 @@ export default async function PlanPage() {
       painEcho={firstPain ? PAIN_ECHO[firstPain] : null}
       profile={
         [
-          a.salary ? `Target £${Math.round(a.salary / 1000)}k+` : null,
+          a.salary ? `Target ${sym}${Math.round(a.salary / 1000)}k+` : null,
           title,
           a.level ? levelLabel[a.level] : null,
           a.setting ? settingLabel[a.setting] : null,
@@ -130,6 +132,7 @@ export default async function PlanPage() {
       topSalary={formatSalary(
         preview[0]?.salaryMin ?? null,
         preview[0]?.salaryMax ?? null,
+        preview[0]?.currency,
       )}
       offers={offers.map((o) => ({
         id: o.plan.id,

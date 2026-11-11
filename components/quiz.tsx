@@ -26,8 +26,12 @@ type Result = {
 type Phase = "quiz" | "matching" | "result" | "name" | "email";
 
 const STORE = "gl_quiz_v1";
-const SAL_MIN = 20_000;
-const SAL_MAX = 150_000;
+export type MarketView = {
+  histogram: number[];
+  cities: string[];
+  defaultCity: string;
+  scale: { min: number; max: number; step: number; start: number; sym: string };
+};
 const fmt = (n: number) => n.toLocaleString("en-GB");
 
 function encode(a: Answers) {
@@ -48,16 +52,16 @@ export function Quiz(props: {
   screens: Screen[];
   arms: Arms;
   stats: QuizStats;
-  histogram: number[];
+  markets: Record<"GB" | "US", MarketView>;
+  defaultCountry: "GB" | "US";
   chips: Chip[];
-  cities: string[];
-  defaultCity: string;
 }) {
   const { screens, arms, stats } = props;
   const router = useRouter();
   const [answers, setAnswers] = useState<Answers>({
-    salary: 45_000,
-    city: props.defaultCity,
+    country: props.defaultCountry,
+    salary: props.markets[props.defaultCountry].scale.start,
+    city: props.markets[props.defaultCountry].defaultCity,
   });
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("quiz");
@@ -135,7 +139,16 @@ export function Quiz(props: {
   };
 
   const set = (patch: Partial<Answers>, advance = false) => {
-    setAnswers((a) => ({ ...a, ...patch }));
+    setAnswers((a) => {
+      const next = { ...a, ...patch };
+      // A new country means its own currency and cities.
+      if (patch.country && patch.country !== a.country) {
+        const m = props.markets[patch.country];
+        next.salary = m.scale.start;
+        next.city = m.defaultCity;
+      }
+      return next;
+    });
     if (screen) track("answer", { id: screen.id });
     if (advance) setTimeout(next, 180);
   };
@@ -211,9 +224,8 @@ export function Quiz(props: {
               next={next}
               painShown={painShown}
               setPainShown={setPainShown}
-              histogram={props.histogram}
+              market={props.markets[answers.country ?? props.defaultCountry]}
               chips={props.chips}
-              cities={props.cities}
               count={count}
             />
           )}
@@ -316,24 +328,25 @@ function ScreenView(p: {
   next: () => void;
   painShown: boolean | null;
   setPainShown: (v: boolean) => void;
-  histogram: number[];
+  market: MarketView;
   chips: Chip[];
-  cities: string[];
   count: number | null;
 }) {
   const { screen: s, answers, set, next, tokens } = p;
   const fill = (t: string) => fillTokens(t, tokens);
 
   if (s.kind === "slider") {
-    const v = answers.salary ?? 45_000;
-    const max = Math.max(1, ...p.histogram);
+    const sc = p.market.scale;
+    const v = answers.salary ?? sc.start;
+    const max = Math.max(1, ...p.market.histogram);
     return (
       <>
         <Title sub={s.sub}>{s.title}</Title>
         <div className={cx(card, "p-5")}>
           <div className="text-center">
             <div className="font-mono text-[40px] font-semibold tabular-nums">
-              £{fmt(v)}
+              {sc.sym}
+              {fmt(v)}
             </div>
             <div className="text-[13px] text-muted">a year</div>
           </div>
@@ -341,15 +354,15 @@ function ScreenView(p: {
             className="mt-6 flex h-24 items-end gap-[3px]"
             aria-hidden="true"
           >
-            {p.histogram.map((n, i) => {
-              const lo = SAL_MIN + i * 5000;
+            {p.market.histogram.map((n, i) => {
+              const lo = sc.min + i * sc.step;
               return (
                 <div
                   // biome-ignore lint/suspicious/noArrayIndexKey: fixed buckets
                   key={i}
                   className={cx(
                     "flex-1 rounded-t-sm transition-colors",
-                    lo + 5000 > v ? "bg-mint/70" : "bg-line",
+                    lo + sc.step > v ? "bg-mint/70" : "bg-line",
                   )}
                   style={{ height: `${Math.max(4, (n / max) * 100)}%` }}
                 />
@@ -358,8 +371,8 @@ function ScreenView(p: {
           </div>
           <input
             type="range"
-            min={SAL_MIN}
-            max={SAL_MAX}
+            min={sc.min}
+            max={sc.max}
             step={1000}
             value={v}
             onChange={(e) => set({ salary: Number(e.target.value) })}
@@ -367,8 +380,14 @@ function ScreenView(p: {
             aria-label="Target salary"
           />
           <div className="flex justify-between text-[12px] text-faint">
-            <span>£20k</span>
-            <span>£150k+</span>
+            <span>
+              {sc.sym}
+              {sc.min / 1000}k
+            </span>
+            <span>
+              {sc.sym}
+              {sc.max / 1000}k+
+            </span>
           </div>
         </div>
         <button
@@ -440,7 +459,10 @@ function ScreenView(p: {
 
   if (s.kind === "title")
     return <TitleStep {...p} title={s.title} sub={s.sub} />;
-  if (s.kind === "city") return <CityStep {...p} title={s.title} sub={s.sub} />;
+  if (s.kind === "city")
+    return (
+      <CityStep {...p} cities={p.market.cities} title={s.title} sub={s.sub} />
+    );
 
   if (s.kind === "interstitial") {
     return (
@@ -763,8 +785,8 @@ function ResultView({
     answers.searching ?? "just_started"
   ];
   const place =
-    answers.setting === "remote" || answers.city === "Remote UK"
-      ? "remote across the UK"
+    answers.setting === "remote" || answers.city?.startsWith("Remote")
+      ? `remote across ${answers.country === "US" ? "the US" : "the UK"}`
       : `in or near ${answers.city}`;
   const empty = result.count === 0;
   return (

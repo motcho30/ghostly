@@ -6,7 +6,7 @@ import { ShareButtons, TrackView } from "@/components/client";
 import { GhostIcon } from "@/components/ghost";
 import { btn, card, cx } from "@/components/ui";
 import { currentUser } from "@/lib/auth";
-import { siteUrl } from "@/lib/brand";
+import { flags, siteUrl } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "You're in" };
@@ -24,9 +24,19 @@ export default async function Welcome() {
           You're in{me.user.name ? `, ${me.user.name}` : ""}.
         </h1>
         <p className="mt-2 text-[15px] text-muted">
-          Your live roles are ready. We also emailed a sign-in link to{" "}
-          <span className="text-text">{me.user.email}</span> for your other
-          devices.
+          Your live roles are ready.{" "}
+          {flags.email() ? (
+            <>
+              We also emailed a sign-in link to{" "}
+              <span className="text-text">{me.user.email}</span> for your other
+              devices.
+            </>
+          ) : (
+            <>
+              You're signed in on this device as{" "}
+              <span className="text-text">{me.user.email}</span>.
+            </>
+          )}
         </p>
         <Link href="/app" className={cx(btn.primary, "mt-6 w-full")}>
           See my live roles
@@ -45,7 +55,7 @@ export default async function Welcome() {
           <div className="mt-3">
             <ShareButtons
               url={link}
-              text="Stop getting ghosted. This sends you new UK roles the hour they go live:"
+              text="Stop getting ghosted. This sends you new UK and US roles the hour they go live:"
               event="referral_share"
             />
           </div>

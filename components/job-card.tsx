@@ -20,7 +20,7 @@ export function JobCard({
   action?: React.ReactNode;
   className?: string;
 }) {
-  const salary = formatSalary(job.salaryMin, job.salaryMax);
+  const salary = formatSalary(job.salaryMin, job.salaryMax, job.currency);
   const place = [
     job.city ?? job.locationText?.split(/[;,]/)[0],
     remoteLabel[job.remote],

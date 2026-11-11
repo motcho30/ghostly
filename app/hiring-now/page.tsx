@@ -10,9 +10,9 @@ import { ghostIndex, siteStats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Who's hiring right now in the UK",
+  title: "Who's hiring right now in the UK and US",
   description:
-    "UK employers ranked by how many new roles they posted this week, straight from their own careers pages. Updated every hour.",
+    "UK and US employers ranked by how many new roles they posted this week, straight from their own careers pages. Updated every hour.",
 };
 
 type Row = Awaited<ReturnType<typeof ghostIndex>>[number];
@@ -57,7 +57,7 @@ export default async function HiringNow({
           Who's hiring right now
         </h1>
         <p className="mt-2 max-w-2xl text-[16px] text-muted">
-          {rows.length} UK employers with 5 or more live roles.{" "}
+          {rows.length} employers with 5 or more live roles in the UK and US.{" "}
           {fmt(stats.fresh7)} new roles went live this week, and{" "}
           {fmt(stats.over30)} of {fmt(stats.liveRoles)} live ads are more than a
           month old, when most applications are long in.
@@ -65,7 +65,7 @@ export default async function HiringNow({
         <div className="mt-4">
           <ShareButtons
             url={`${siteUrl()}/hiring-now`}
-            text="Which UK companies are actually hiring this week:"
+            text="Which companies are actually hiring this week:"
             event="index_share"
           />
         </div>

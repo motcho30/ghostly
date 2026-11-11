@@ -38,18 +38,18 @@ export const esc = (s: string) =>
   );
 
 export function layout(title: string, body: string): string {
-  return `<!doctype html><html><body style="margin:0;background:#0b0b12;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#f5f5fa">
+  return `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#0f1222">
 <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-<table width="100%" style="max-width:520px;background:#14141f;border:1px solid #2a2a3d;border-radius:16px" cellpadding="0" cellspacing="0"><tr><td style="padding:28px">
+<table width="100%" style="max-width:520px;background:#ffffff;border:1px solid #e4e6eb;border-radius:16px" cellpadding="0" cellspacing="0"><tr><td style="padding:28px">
 <div style="font-weight:700;font-size:18px;margin-bottom:20px">👻 ${BRAND.name}</div>
 <h1 style="font-size:22px;line-height:1.3;margin:0 0 12px">${esc(title)}</h1>
 ${body}
-<p style="color:#a0a0b8;font-size:12px;margin-top:28px">${BRAND.name} · New UK roles, the hour they go live. <a style="color:#a0a0b8" href="${siteUrl()}/app/account">Email settings</a></p>
+<p style="color:#8a90a2;font-size:12px;margin-top:28px">${BRAND.name} · New UK roles, the hour they go live. <a style="color:#8a90a2" href="${siteUrl()}/app/account">Email settings</a></p>
 </td></tr></table></td></tr></table></body></html>`;
 }
 
 export const button = (href: string, label: string) =>
-  `<p style="margin:24px 0"><a href="${href}" style="background:#6cf7b0;color:#0b0b12;padding:12px 20px;border-radius:999px;font-weight:700;text-decoration:none;display:inline-block">${esc(label)}</a></p>`;
+  `<p style="margin:24px 0"><a href="${href}" style="background:#0f8a5f;color:#ffffff;padding:12px 20px;border-radius:999px;font-weight:700;text-decoration:none;display:inline-block">${esc(label)}</a></p>`;
 
 export const p = (text: string) =>
-  `<p style="color:#d6d6e4;font-size:15px;line-height:1.55;margin:0 0 12px">${esc(text)}</p>`;
+  `<p style="color:#3a3f52;font-size:15px;line-height:1.55;margin:0 0 12px">${esc(text)}</p>`;

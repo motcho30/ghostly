@@ -8,7 +8,18 @@ import type { Screen } from "./types";
  * Screens marked long are skipped in the short-quiz arm.
  */
 export const SCREENS: Screen[] = [
-  // 1. Your goal: open on the dream, not the pain.
+  // 1. Your goal: where, then the dream, not the pain.
+  {
+    id: "country",
+    kind: "single",
+    chapter: "Your goal",
+    field: "country",
+    title: "Where are you job hunting?",
+    options: [
+      { value: "GB", label: "United Kingdom", emoji: "🇬🇧" },
+      { value: "US", label: "United States", emoji: "🇺🇸" },
+    ],
+  },
   {
     id: "salary",
     kind: "slider",

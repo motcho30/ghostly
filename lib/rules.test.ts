@@ -119,3 +119,27 @@ test("agencies and listed non-employers are kept out of every source", async () 
   assert.equal(isExcludedEmployer("Greene King"), false);
   assert.equal(isExcludedEmployer("Monzo"), false);
 });
+
+test("each ad lands in the right market, UK or US", async () => {
+  const { marketOf, cityOf, parseSalary, formatSalary } = await import(
+    "./jobs/normalize"
+  );
+  assert.equal(marketOf("London, United Kingdom"), "GB");
+  assert.equal(marketOf("New York, NY"), "US");
+  assert.equal(marketOf("San Francisco, CA; Remote - US"), "US");
+  assert.equal(marketOf("Cambridge, MA"), "US");
+  assert.equal(marketOf("Birmingham, AL"), "US");
+  assert.equal(marketOf("Birmingham"), "GB");
+  assert.equal(marketOf("New York; London"), "GB");
+  assert.equal(marketOf("Toronto, ON"), null);
+  assert.equal(marketOf("London, ON"), null);
+  assert.equal(marketOf("Berlin, Germany"), null);
+  assert.equal(marketOf("Remote", "US"), "US");
+  assert.equal(marketOf("Anywhere", "DE"), null);
+  assert.equal(cityOf("Brooklyn, NY", "US"), "Brooklyn");
+  assert.equal(cityOf("NYC", "US"), "New York");
+  assert.equal(parseSalary("$120,000 - $150,000 a year")?.currency, "USD");
+  assert.equal(parseSalary("$120K–$150K")?.max, 150000);
+  assert.equal(parseSalary("£45,000 and $60,000", "USD")?.min, 60000);
+  assert.equal(formatSalary(120000, 150000, "USD"), "$120k to $150k");
+});

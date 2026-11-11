@@ -56,7 +56,12 @@ export default async function Landing() {
       <Section className="pt-8 pb-14 text-center sm:pt-16">
         <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-muted">
           <span className="pulse-dot h-2 w-2 rounded-full bg-mint" />
-          {fmt(stats.fresh24)} new UK roles went live in the last 24 hours
+          <span>
+            <span className="font-semibold text-text">
+              {fmt(stats.liveRoles)} live roles
+            </span>{" "}
+            across the UK and US · {fmt(stats.fresh24)} new today
+          </span>
         </p>
         <h1 className="mx-auto mt-6 max-w-3xl text-[48px] font-semibold leading-[1.02] tracking-tight sm:text-[76px]">
           Stop getting{" "}
@@ -189,7 +194,7 @@ export default async function Landing() {
               icon: Clock,
               c: "text-violet",
               t: "We check every hour",
-              b: `${stats.companies} UK employers' own careers pages, every hour. No job boards, no agencies in the middle.`,
+              b: `${fmt(stats.companies)} employers' own careers pages across the UK and US, every hour. No job boards, no agencies in the middle.`,
             },
             {
               icon: Mail,
@@ -303,7 +308,7 @@ export default async function Landing() {
             {
               icon: EyeOff,
               t: "Stale ads hidden",
-              b: `${fmt(stats.over30)} live UK ads are over a month old. You won't waste an evening on them.`,
+              b: `${fmt(stats.over30)} live ads are over a month old. You won't waste an evening on them.`,
             },
           ].map((b) => (
             <div key={b.t} className={cx(card, "p-5")}>
@@ -440,7 +445,7 @@ export default async function Landing() {
       <StickyCta
         href="/start"
         label={BRAND.cta}
-        line={`${fmt(stats.fresh24)} new UK roles in the last 24 hours`}
+        line={`${fmt(stats.liveRoles)} live roles in the UK and US, ${fmt(stats.fresh24)} new today`}
       />
     </main>
   );

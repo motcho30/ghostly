@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { isExcludedEmployer } from "@/lib/ingest/excluded";
 import { syncSeedBoards } from "@/lib/ingest/run";
-import { UK_CITIES } from "@/lib/jobs/normalize";
+import { UK_CITIES, US_CITIES } from "@/lib/jobs/normalize";
 
 /**
  * Daily discovery. SmartRecruiters' public search returns the newest postings
@@ -25,6 +25,20 @@ const PLACES = [
   "Remote UK",
   "Canary Wharf",
   "Belfast",
+  ...US_CITIES,
+  "United States",
+  "USA",
+  "Remote US",
+  "California",
+  "Texas",
+  "Florida",
+  "New Jersey",
+  "Massachusetts",
+  "Illinois",
+  "Virginia",
+  "North Carolina",
+  "Georgia",
+  "Ohio",
 ];
 const WORDS = [
   "engineer",
@@ -112,6 +126,8 @@ export async function discoverBoards(
     ...PLACES,
     ...WORDS.map((w) => `${w} London`),
     ...WORDS.map((w) => `${w} UK`),
+    ...WORDS.map((w) => `${w} New York`),
+    ...WORDS.map((w) => `${w} USA`),
   ];
   const candidates = new Map<string, string>();
   let skippedAgencies = 0;
@@ -123,7 +139,11 @@ export async function discoverBoards(
     for (const h of data?.content ?? []) {
       const id = h.company?.identifier;
       const name = h.company?.name?.trim();
-      if (!id || !name || (h.location?.country ?? "").toLowerCase() !== "gb")
+      if (
+        !id ||
+        !name ||
+        !["gb", "us"].includes((h.location?.country ?? "").toLowerCase())
+      )
         continue;
       if (known.has(id.toLowerCase()) || candidates.has(id)) continue;
       if (isExcludedEmployer(name, id)) {
@@ -140,11 +160,15 @@ export async function discoverBoards(
   let checked = 0;
   await pool(list, 8, async ([slug, name]) => {
     checked++;
-    const page = await json<{ totalFound?: number }>(
-      `https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(slug)}/postings?country=gb&limit=1`,
-    );
-    if ((page?.totalFound ?? 0) > 0)
-      found.push({ slug, name, uk: page?.totalFound ?? 0 });
+    // Keep employers with live roles in either market.
+    let total = 0;
+    for (const cc of ["gb", "us"]) {
+      const page = await json<{ totalFound?: number }>(
+        `https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(slug)}/postings?country=${cc}&limit=1`,
+      );
+      total += page?.totalFound ?? 0;
+    }
+    if (total > 0) found.push({ slug, name, uk: total });
   });
 
   if (found.length) {
