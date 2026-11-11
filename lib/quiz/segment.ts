@@ -15,8 +15,8 @@ export function segmentOf(a: Answers): Segment {
   )
     return "senior";
   const longSearch = a.searching === "3_6" || a.searching === "6_plus";
-  if (a.status === "out_of_work" || (longSearch && a.start === "asap"))
-    return "urgent";
+  // Out of work, or searching for three months or more.
+  if (a.status === "out_of_work" || longSearch) return "urgent";
   if (a.status === "employed") return "switcher";
   return "casual";
 }

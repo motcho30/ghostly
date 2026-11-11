@@ -68,7 +68,8 @@ export function verifyStripeSignature(
 export async function checkoutUrl(lead: Lead, planId: PlanId): Promise<string> {
   const offer = leadOffer(lead, planId);
   if (!flags.stripe()) {
-    return `/checkout/dev?t=${sign({ leadId: lead.id, planId, exp: Date.now() + 30 * 60_000 })}`;
+    // The price is fixed when checkout starts, like Stripe does, so a slow payer keeps it.
+    return `/checkout/dev?t=${sign({ leadId: lead.id, planId, exp: Date.now() + 30 * 60_000, pricePence: offer.pricePence, firstChargePence: offer.firstChargePence })}`;
   }
   const { plan } = offer;
   const recurring = plan.per !== "once";

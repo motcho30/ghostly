@@ -4,7 +4,7 @@ import { anonId } from "@/lib/cookies";
 import { getDb, schema } from "@/lib/db";
 import type { PlanId } from "@/lib/db/schema";
 import type { Arms } from "@/lib/experiments";
-import { HOLD_HOURS, offerFor } from "@/lib/pricing";
+import { INTRO_HOLD_MINUTES, offerFor } from "@/lib/pricing";
 import type { Answers } from "@/lib/quiz/types";
 
 const { leads, users } = schema;
@@ -49,7 +49,7 @@ export async function ensureIntroHold(lead: Lead): Promise<Lead> {
   const db = await getDb();
   const [updated] = await db
     .update(leads)
-    .set({ introExpiresAt: new Date(Date.now() + HOLD_HOURS * 3_600_000) })
+    .set({ introExpiresAt: new Date(Date.now() + INTRO_HOLD_MINUTES * 60_000) })
     .where(eq(leads.id, lead.id))
     .returning();
   return updated;

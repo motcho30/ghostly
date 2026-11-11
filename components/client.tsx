@@ -2,7 +2,7 @@
 
 import { Check, Copy, Download, Share2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { track } from "@/lib/track-client";
 import { btn, cx } from "./ui";
@@ -26,27 +26,42 @@ export function TrackView({
 export function Countdown({
   until,
   className,
+  onEnd,
 }: {
   until: string;
   className?: string;
+  onEnd?: () => void;
 }) {
   const [left, setLeft] = useState<number | null>(null);
+  const ended = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: onEnd only needs to fire once
   useEffect(() => {
     const end = new Date(until).getTime();
-    const tick = () => setLeft(Math.max(0, end - Date.now()));
+    const tick = () => {
+      const ms = Math.max(0, end - Date.now());
+      setLeft(ms);
+      if (ms === 0 && !ended.current) {
+        ended.current = true;
+        onEnd?.();
+      }
+    };
     tick();
-    const t = setInterval(tick, 1000);
+    const t = setInterval(tick, 250);
     return () => clearInterval(t);
   }, [until]);
-  if (left == null) return <span className={className}>--:--:--</span>;
+  if (left == null) return <span className={className}>--:--</span>;
   const h = Math.floor(left / 3_600_000);
   const m = Math.floor((left % 3_600_000) / 60_000);
   const s = Math.floor((left % 60_000) / 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
+  const text =
+    left === 0
+      ? "00:00"
+      : h > 0
+        ? `${pad(h)}:${pad(m)}:${pad(s)}`
+        : `${pad(m)}:${pad(s)}`;
   return (
-    <span className={cx("font-mono tabular-nums", className)}>
-      {left === 0 ? "ended" : `${pad(h)}:${pad(m)}:${pad(s)}`}
-    </span>
+    <span className={cx("font-mono tabular-nums", className)}>{text}</span>
   );
 }
 

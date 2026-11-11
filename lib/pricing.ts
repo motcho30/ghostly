@@ -38,7 +38,14 @@ export const PLANS: Plan[] = [
 ];
 
 export const LATER_DISCOUNT_PCT = 20;
+/** How long the "Maybe later" offer is held. */
 export const HOLD_HOURS = 24;
+/**
+ * How long the intro price (first week £1 or free) is held from the first
+ * paywall view. It is a real deadline: the server stops offering it after this,
+ * and reloading does not restart it.
+ */
+export const INTRO_HOLD_MINUTES = 2;
 
 export type Offer = {
   plan: Plan;
@@ -86,12 +93,21 @@ export function offerFor(planId: PlanId, ctx: OfferContext): Offer {
         ? "First week free"
         : "First week £1";
   }
-  const then = renewalDate(ctx.now, plan);
-  const terms =
-    plan.per === "once"
-      ? `${pounds(firstChargePence)} once. No renewals.`
-      : firstChargePence !== pricePence
-        ? `${pounds(firstChargePence)} today, then ${pounds(pricePence)} every ${plan.per} from ${then} until you cancel.`
-        : `${pounds(pricePence)} today, then every ${plan.per} from ${then} until you cancel.`;
+  const terms = termsFor(plan, firstChargePence, pricePence, ctx.now);
   return { plan, pricePence, firstChargePence, terms, introLabel };
+}
+
+/** Plain-words line about today's charge and what follows. */
+export function termsFor(
+  plan: Plan,
+  firstChargePence: number,
+  pricePence: number,
+  now: Date,
+): string {
+  const then = renewalDate(now, plan);
+  if (plan.per === "once")
+    return `${pounds(firstChargePence)} once. No renewals.`;
+  return firstChargePence !== pricePence
+    ? `${pounds(firstChargePence)} today, then ${pounds(pricePence)} every ${plan.per} from ${then} until you cancel.`
+    : `${pounds(pricePence)} today, then every ${plan.per} from ${then} until you cancel.`;
 }

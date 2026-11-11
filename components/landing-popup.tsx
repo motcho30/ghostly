@@ -54,13 +54,13 @@ export function LandingPopup({
     return () => clearTimeout(t);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: close is stable enough here
   useEffect(() => {
     if (!open) return;
     cta.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close("escape");
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // biome-ignore lint/correctness/useExhaustiveDependencies: close is stable enough here
   }, [open]);
 
   function close(how: string) {
@@ -70,18 +70,19 @@ export function LandingPopup({
 
   if (!open) return null;
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]"
-      onClick={() => close("backdrop")}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]">
+      <button
+        type="button"
+        aria-label="Close"
+        tabIndex={-1}
+        className="absolute inset-0 cursor-default"
+        onClick={() => close("backdrop")}
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="popup-title"
         className="rise relative w-full max-w-[460px] rounded-3xl bg-white p-8 text-center shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
       >
         <button
           type="button"

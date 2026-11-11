@@ -235,48 +235,71 @@ export function Paywall(p: Props) {
 
   return (
     <main className="glow min-h-dvh pb-16">
-      {(p.introUntil || p.referred || p.laterState === "active") && (
-        <div className="sticky top-0 z-20 border-b border-line bg-surface/95 px-4 py-2.5 backdrop-blur">
-          <div className="mx-auto flex max-w-[460px] items-center justify-between gap-3 text-[13px]">
-            <span className="text-muted">
-              {p.laterState === "active" && p.laterUntil ? (
-                <>
-                  20% off held for you:{" "}
-                  <Countdown until={p.laterUntil} className="text-text" />
-                </>
-              ) : p.referred ? (
-                "A friend gave you your first week free"
-              ) : (
-                <>
-                  {p.introFree ? "Free first week" : "£1 first week"} held for
-                  you:{" "}
-                  <Countdown
-                    until={p.introUntil as string}
-                    className="text-text"
-                  />
-                </>
-              )}
-            </span>
-            <a href="#plans" className="shrink-0 font-semibold text-mint">
-              Get access
-            </a>
-          </div>
-        </div>
-      )}
+      <TopBar p={p} router={router} />
 
-      <div className="mx-auto max-w-[460px] px-4 pt-8">
+      <div className="mx-auto max-w-[460px] px-4 pt-6">
         <p className="text-[13px] font-medium uppercase tracking-[0.14em] text-mint">
           {p.name ? `${p.name}, your search is ready` : "Your search is ready"}
         </p>
-        <h1 className="mt-2 text-[32px] font-semibold leading-tight tracking-tight">
-          {p.headline}
+        <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-tight">
+          We found <span className="text-mint">{fmt(p.count)}</span> live{" "}
+          {p.title} roles {p.place}
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          {p.segmentLine}
+        <p className="mt-2 text-[15px] leading-relaxed text-muted">
+          {p.headline} {p.segmentLine}
         </p>
 
+        <div id="plans" className="scroll-mt-16 pt-5">
+          <h2 className="sr-only">Choose your plan</h2>
+          {Plans}
+          <div className="mt-4">{Cta("main")}</div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[12px] text-muted">
+            <span className="flex flex-col items-center gap-1">
+              <CreditCard className="h-4 w-4" /> Secure payment by Stripe
+            </span>
+            <span className="flex flex-col items-center gap-1">
+              <X className="h-4 w-4" /> Cancel in two clicks
+            </span>
+            <span className="flex flex-col items-center gap-1">
+              <BellRing className="h-4 w-4" /> Reminder before renewals
+            </span>
+          </div>
+        </div>
+
+        <div className={cx(card, "mt-8 p-5")}>
+          <h2 className="text-[17px] font-semibold leading-snug">
+            Your search
+          </h2>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {p.profile.map((x) => (
+              <span
+                key={x}
+                className="rounded-full border border-line bg-surface-2 px-2.5 py-1 text-[12px] text-muted"
+              >
+                {x}
+              </span>
+            ))}
+          </div>
+          {p.painEcho && (
+            <p className="mt-4 border-t border-line pt-4 text-[14px] leading-relaxed text-muted">
+              You said{" "}
+              <span className="font-serif text-[16px] italic text-text">
+                {p.painEcho}
+              </span>{" "}
+              is the worst part. Getting in early, straight to the company, is
+              how you beat it.
+            </p>
+          )}
+          {p.fresh48 > 0 && (
+            <p className="mt-3 text-[14px] text-mint">
+              <Sparkles className="mr-1 inline h-4 w-4" />
+              {p.fresh48} of these went live in the last 48 hours.
+            </p>
+          )}
+        </div>
+
         {/* Real weekly flow of matching roles */}
-        <div className={cx(card, "mt-6 p-5")}>
+        <div className={cx(card, "mt-4 p-5")}>
           <div className="flex items-baseline justify-between">
             <p className="font-semibold">New matching roles each week</p>
             <p className="text-[12px] text-faint">still open today</p>
@@ -310,57 +333,6 @@ export function Paywall(p: Props) {
               ? `About ${lastWeek} new roles a week for you lately, if hiring holds. A forecast, not a promise.`
               : "Quiet lately. We'll email you when new ones land."}
           </p>
-        </div>
-
-        <div className={cx(card, "mt-4 p-5")}>
-          <h2 className="text-[20px] font-semibold leading-snug">
-            {p.name ? `${p.name}, we` : "We"} found{" "}
-            <span className="text-mint">{fmt(p.count)}</span> live {p.title}{" "}
-            roles {p.place}
-          </h2>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {p.profile.map((x) => (
-              <span
-                key={x}
-                className="rounded-full border border-line bg-surface-2 px-2.5 py-1 text-[12px] text-muted"
-              >
-                {x}
-              </span>
-            ))}
-          </div>
-          {p.painEcho && (
-            <p className="mt-4 border-t border-line pt-4 text-[14px] leading-relaxed text-muted">
-              You said{" "}
-              <span className="font-serif text-[16px] italic text-text">
-                {p.painEcho}
-              </span>{" "}
-              is the worst part. Getting in early, straight to the company, is
-              how you beat it.
-            </p>
-          )}
-          {p.fresh48 > 0 && (
-            <p className="mt-3 text-[14px] text-mint">
-              <Sparkles className="mr-1 inline h-4 w-4" />
-              {p.fresh48} of these went live in the last 48 hours.
-            </p>
-          )}
-        </div>
-
-        <div id="plans" className="scroll-mt-16 pt-8">
-          <h2 className="mb-3 text-[22px] font-semibold">Choose your plan</h2>
-          {Plans}
-          <div className="mt-4">{Cta("main")}</div>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[12px] text-muted">
-            <span className="flex flex-col items-center gap-1">
-              <CreditCard className="h-4 w-4" /> Secure payment by Stripe
-            </span>
-            <span className="flex flex-col items-center gap-1">
-              <X className="h-4 w-4" /> Cancel in two clicks
-            </span>
-            <span className="flex flex-col items-center gap-1">
-              <BellRing className="h-4 w-4" /> Reminder before renewals
-            </span>
-          </div>
         </div>
 
         <div className={cx(card, "mt-8 p-5")}>
@@ -464,5 +436,72 @@ export function Paywall(p: Props) {
         </div>
       )}
     </main>
+  );
+}
+
+/**
+ * The bar at the top of the paywall. For the intro offer it is red, with a
+ * flashing light and a countdown to the real deadline held on the server; when
+ * it reaches zero the page reloads at full price.
+ */
+function TopBar({
+  p,
+  router,
+}: {
+  p: Props;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const weekly = p.offers.find((o) => o.id === "weekly");
+  if (p.laterState === "active" && p.laterUntil) {
+    return (
+      <div className="sticky top-0 z-20 bg-coral px-4 py-2.5 text-white">
+        <div className="mx-auto flex max-w-[460px] items-center justify-between gap-3 text-[13px] font-medium">
+          <span className="flex items-center gap-2">
+            <span className="flash h-2.5 w-2.5 shrink-0 rounded-full bg-white" />
+            20% off any plan ends in{" "}
+            <Countdown
+              until={p.laterUntil}
+              onEnd={() => router.refresh()}
+              className="font-bold"
+            />
+          </span>
+          <a href="#plans" className="shrink-0 font-bold underline">
+            Claim it
+          </a>
+        </div>
+      </div>
+    );
+  }
+  if (p.referred) {
+    return (
+      <div className="sticky top-0 z-20 bg-mint px-4 py-2.5 text-center text-[13px] font-medium text-white">
+        A friend gave you your first week free
+      </div>
+    );
+  }
+  if (!p.introUntil || !weekly) return null;
+  return (
+    <div className="sticky top-0 z-20 bg-coral px-4 py-2.5 text-white">
+      <div className="mx-auto flex max-w-[460px] items-center justify-between gap-3 text-[13px] font-medium">
+        <span className="flex items-center gap-2">
+          <span className="flash h-2.5 w-2.5 shrink-0 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.8)]" />
+          <span>
+            Intro discount: first week <b>{weekly.today}</b> instead of{" "}
+            <s className="opacity-80">{weekly.price}</s>. Ends in{" "}
+            <Countdown
+              until={p.introUntil}
+              onEnd={() => router.refresh()}
+              className="font-bold"
+            />
+          </span>
+        </span>
+        <a
+          href="#plans"
+          className="shrink-0 rounded-full bg-white px-3 py-1 text-[12px] font-bold text-coral"
+        >
+          Claim it
+        </a>
+      </div>
+    </div>
   );
 }

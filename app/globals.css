@@ -90,7 +90,22 @@ body {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
+@keyframes flash {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+.flash {
+  animation: flash 0.9s steps(1, end) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .flash,
   .rise,
   .float,
   .pulse-dot {

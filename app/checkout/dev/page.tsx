@@ -6,7 +6,7 @@ import { flags } from "@/lib/brand";
 import type { PlanId } from "@/lib/db/schema";
 import { unsign } from "@/lib/ids";
 import { leadById, leadOffer } from "@/lib/leads";
-import { pounds } from "@/lib/pricing";
+import { pounds, termsFor } from "@/lib/pricing";
 import { completeTestCheckout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -23,12 +23,30 @@ export default async function DevCheckout({
   const { t } = await searchParams;
   const data =
     typeof t === "string"
-      ? unsign<{ leadId: string; planId: PlanId; exp: number }>(t)
+      ? unsign<{
+          leadId: string;
+          planId: PlanId;
+          exp: number;
+          pricePence: number;
+          firstChargePence: number;
+        }>(t)
       : null;
   if (!data || data.exp < Date.now()) notFound();
   const lead = await leadById(data.leadId);
   if (!lead) notFound();
-  const offer = leadOffer(lead, data.planId);
+  // Show the price fixed when checkout started, not today's.
+  const base = leadOffer(lead, data.planId);
+  const offer = {
+    plan: base.plan,
+    pricePence: data.pricePence,
+    firstChargePence: data.firstChargePence,
+    terms: termsFor(
+      base.plan,
+      data.firstChargePence,
+      data.pricePence,
+      new Date(),
+    ),
+  };
 
   return (
     <main className="glow flex min-h-dvh items-center justify-center p-4">
