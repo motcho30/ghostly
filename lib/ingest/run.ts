@@ -42,12 +42,15 @@ const FULL_SCAN_HOURS = 20;
 const FULL_SCAN_DAYS = 30;
 const US_FULL_SCAN_DAYS = 14;
 /** Ads older than this are almost never a live opening, so we don't store them at all. */
-export const MAX_AGE_DAYS = 180;
+export const MAX_AGE_DAYS: Record<Market, number> = { GB: 180, US: 60 };
+/** Closed ads are kept this long, to spot the same role being re-posted, then deleted. */
+const KEEP_CLOSED_DAYS = 120;
+const TEXT_LIMIT = 2_500;
 
 function freshEnough(p: Posting, now: Date): boolean {
+  const limit = MAX_AGE_DAYS[marketOf(p.locationText, p.country) ?? "GB"];
   return (
-    !p.postedAt ||
-    now.getTime() - p.postedAt.getTime() <= MAX_AGE_DAYS * 86_400_000
+    !p.postedAt || now.getTime() - p.postedAt.getTime() <= limit * 86_400_000
   );
 }
 /** Boards that are gone this many runs in a row stop being read. */
@@ -341,18 +344,32 @@ export async function runIngest(
 }
 
 /** Close what should no longer show: ads past the age limit, and anything from a blocked employer. */
+/**
+ * Keep the database lean. Ads past their country's age limit and ads closed more
+ * than 120 days ago are deleted, not just closed, so the space comes back. Ads a
+ * member saved or applied to are never deleted. Anything from a blocked employer
+ * is closed, and any ad text over the limit is cut down.
+ */
 async function sweep(now: Date): Promise<number> {
   const db = await getDb();
+  const unreferenced = sql`not exists (select 1 from ${applications} a where a.job_id = ${jobs.id})
+    and not exists (select 1 from ${schema.savedJobs} s where s.job_id = ${jobs.id})`;
   const old = await db
-    .update(jobs)
-    .set({ closedAt: now })
+    .delete(jobs)
     .where(
       and(
-        isNull(jobs.closedAt),
-        sql`coalesce(${jobs.postedAt}, ${jobs.firstSeenAt}) < now() - make_interval(days => ${MAX_AGE_DAYS})`,
+        sql`(
+          (${jobs.country} = 'GB' and coalesce(${jobs.postedAt}, ${jobs.firstSeenAt}) < now() - make_interval(days => ${MAX_AGE_DAYS.GB}))
+          or (${jobs.country} = 'US' and coalesce(${jobs.postedAt}, ${jobs.firstSeenAt}) < now() - make_interval(days => ${MAX_AGE_DAYS.US}))
+          or (${jobs.closedAt} < now() - make_interval(days => ${KEEP_CLOSED_DAYS}))
+        )`,
+        unreferenced,
       ),
     )
     .returning({ id: jobs.id });
+  await db.execute(
+    sql`update jobs set description_text = left(description_text, ${TEXT_LIMIT}) where length(description_text) > ${TEXT_LIMIT}`,
+  );
   const all = await db
     .select({
       id: companies.id,

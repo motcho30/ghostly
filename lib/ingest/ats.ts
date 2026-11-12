@@ -40,7 +40,9 @@ export function loadBoards(): Board[] {
 }
 
 // Enough for the verdict and the job page; full ads stay one click away on the company site.
-const MAX_TEXT = 6_000;
+// The opening of the ad is what the verdict reads; the full ad is one click away
+// on the company's site. Kept short so the free database holds every role.
+export const MAX_TEXT = 2_500;
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url, {

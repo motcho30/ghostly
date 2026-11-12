@@ -14,7 +14,7 @@ const RATE_LIMIT_WAIT_MS = 30_000;
 
 export class WorkableRateLimited extends Error {}
 const SEARCH = "https://jobs.workable.com/api/v1/jobs";
-const MAX_TEXT = 6_000;
+const MAX_TEXT = 2_500;
 
 /** Recruitment firms post on Workable too. We only list employers hiring for themselves. */
 export const AGENCY_NAME =

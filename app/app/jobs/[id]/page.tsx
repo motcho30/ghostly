@@ -104,7 +104,16 @@ export default async function JobPage({ params }: PageProps<"/app/jobs/[id]">) {
             <h2 className="font-semibold">The ad</h2>
             <div className="mt-3 max-h-[520px] overflow-y-auto whitespace-pre-line text-[14px] leading-relaxed text-muted">
               {job.descriptionText}
+              {job.descriptionText.length >= 2_400 && "…"}
             </div>
+            <a
+              href={job.applyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block text-[14px] font-medium text-mint underline"
+            >
+              Read the full ad on {company.name}'s site
+            </a>
           </div>
         </div>
         <aside className="order-first space-y-4 sm:order-none">
