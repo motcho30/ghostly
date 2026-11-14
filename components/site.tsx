@@ -33,14 +33,15 @@ export function SiteFooter() {
         <div className="sm:col-span-2">
           <Logo />
           <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-faint">
-            New UK roles straight from company careers pages, sent the hour they
-            go live. Not affiliated with the companies shown.
+            New UK and US roles straight from company careers pages, sent the
+            hour they go live. Not affiliated with the companies shown.
           </p>
         </div>
         <div className="flex flex-col gap-2">
           <Link href="/check">Is it worth applying?</Link>
           <Link href="/hiring-now">Hiring now</Link>
           <Link href="/how-we-score">How we judge timing</Link>
+          <Link href="/blog">Blog</Link>
           <Link href="/start">{BRAND.cta}</Link>
         </div>
         <div className="flex flex-col gap-2">

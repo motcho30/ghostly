@@ -12,7 +12,11 @@ export const BRAND = {
 } as const;
 
 export function siteUrl(): string {
-  return (process.env.SITE_URL || "http://localhost:3007").replace(/\/$/, "");
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return (
+    process.env.SITE_URL ||
+    (vercel ? `https://${vercel}` : "http://localhost:3007")
+  ).replace(/\/$/, "");
 }
 
 export const flags = {

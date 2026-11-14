@@ -522,7 +522,9 @@ async function storePostings(
 
   // A source can list one ad twice (in both UK and US results, or on two pages).
   // One insert may not touch the same row twice, so keep the last copy of each.
-  const unique = [...new Map(rows.map((r) => [`${r.source}:${r.sourceId}`, r])).values()];
+  const unique = [
+    ...new Map(rows.map((r) => [`${r.source}:${r.sourceId}`, r])).values(),
+  ];
   for (let i = 0; i < unique.length; i += 100) {
     await db
       .insert(jobs)
