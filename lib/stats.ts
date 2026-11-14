@@ -16,7 +16,7 @@ const g = globalThis as unknown as {
 };
 if (!g.__ghostlessStats) g.__ghostlessStats = new Map();
 const cache = g.__ghostlessStats;
-async function cached<T>(
+export async function cached<T>(
   key: string,
   ms: number,
   fn: () => Promise<T>,

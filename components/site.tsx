@@ -10,6 +10,12 @@ export function SiteHeader({ right }: { right?: React.ReactNode }) {
       <nav className="flex items-center gap-4 text-[14px]">
         {right ?? (
           <>
+            <Link
+              href="/jobs"
+              className="hidden text-muted hover:text-text sm:inline"
+            >
+              Browse jobs
+            </Link>
             <Link href="/check" className="text-muted hover:text-text">
               Is it worth applying?
             </Link>
@@ -29,7 +35,7 @@ export function SiteHeader({ right }: { right?: React.ReactNode }) {
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line">
-      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 text-[14px] text-muted sm:grid-cols-4">
+      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 text-[14px] text-muted sm:grid-cols-5">
         <div className="sm:col-span-2">
           <Logo />
           <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-faint">
@@ -43,6 +49,13 @@ export function SiteFooter() {
           <Link href="/how-we-score">How we judge timing</Link>
           <Link href="/blog">Blog</Link>
           <Link href="/start">{BRAND.cta}</Link>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Link href="/jobs/london">Jobs in London</Link>
+          <Link href="/jobs/new-york">Jobs in New York</Link>
+          <Link href="/jobs/remote-uk">Remote jobs, UK</Link>
+          <Link href="/jobs/remote-us">Remote jobs, US</Link>
+          <Link href="/jobs">All job searches</Link>
         </div>
         <div className="flex flex-col gap-2">
           <Link href="/legal/terms">Terms</Link>

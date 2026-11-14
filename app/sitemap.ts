@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { POSTS } from "@/lib/blog/posts";
 import { siteUrl } from "@/lib/brand";
+import { indexablePaths } from "@/lib/seo/landing";
 import { ghostIndex } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(p.published),
       changeFrequency: "monthly",
       priority: 0.7,
+    });
+  // City and role pages with enough live roles to be useful.
+  const landing = await indexablePaths().catch(() => [] as string[]);
+  pages.push({
+    url: `${base}/jobs`,
+    lastModified: now,
+    changeFrequency: "hourly",
+    priority: 0.9,
+  });
+  for (const path of landing)
+    pages.push({
+      url: `${base}${path}`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: path.split("/").length > 3 ? 0.6 : 0.8,
     });
   // Company pages with a real number of live roles. A database hiccup still
   // serves the rest of the sitemap.

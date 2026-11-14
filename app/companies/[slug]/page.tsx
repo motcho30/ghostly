@@ -4,10 +4,11 @@ import { notFound } from "next/navigation";
 
 import { CtaLink, TrackView } from "@/components/client";
 import { TimingBadge } from "@/components/ghost-badge";
+import { breadcrumbs, JsonLd } from "@/components/json-ld";
 import { Section, SiteFooter, SiteHeader } from "@/components/site";
 import { btn, card, cx } from "@/components/ui";
 import { currentUser, hasAccess } from "@/lib/auth";
-import { BRAND } from "@/lib/brand";
+import { BRAND, siteUrl } from "@/lib/brand";
 import { MIN_MEMBER_APPS } from "@/lib/ghost/score";
 import { companyBySlug, companyJobs } from "@/lib/stats";
 
@@ -22,7 +23,8 @@ export async function generateMetadata({
   if (!c) return { title: "Company" };
   return {
     title: `Does ${c.name} reply? New roles and reply rates`,
-    description: `${c.open} live roles at ${c.name}. Typical ad is ${c.medianAgeDays} days old. See which ones are fresh before you apply.`,
+    description: `${c.open} live roles at ${c.name}, ${c.newThisWeek} posted this week. Typical ad is ${c.medianAgeDays} days old. See which ones are fresh before you apply.`,
+    alternates: { canonical: `/companies/${c.slug}` },
   };
 }
 
@@ -39,6 +41,13 @@ export default async function CompanyPage({
   return (
     <main className="glow flex min-h-dvh flex-col">
       <TrackView name="company_view" props={{ slug: c.slug }} />
+      <JsonLd
+        data={breadcrumbs(siteUrl(), [
+          ["Home", "/"],
+          ["Hiring now", "/hiring-now"],
+          [c.name, `/companies/${c.slug}`],
+        ])}
+      />
       <SiteHeader />
       <Section className="max-w-3xl pt-6 pb-16">
         <Link
@@ -51,7 +60,8 @@ export default async function CompanyPage({
           {c.name}
         </h1>
         <p className="text-[15px] text-muted">
-          Live UK roles from {c.name}'s own careers page, checked today.
+          Live UK and US roles from {c.name}'s own careers page, checked every
+          hour.
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -99,9 +109,7 @@ export default async function CompanyPage({
             </li>
           ))}
           {shown.length === 0 && (
-            <li className="px-5 py-4 text-muted">
-              No live UK roles right now.
-            </li>
+            <li className="px-5 py-4 text-muted">No live roles right now.</li>
           )}
         </ul>
         {!member && jobs.length > PUBLIC_ROWS && (

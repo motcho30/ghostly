@@ -10,6 +10,7 @@ import { ghostIndex, siteStats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
+  alternates: { canonical: "/hiring-now" },
   title: "Who's hiring right now in the UK and US",
   description:
     "UK and US employers ranked by how many new roles they posted this week, straight from their own careers pages. Updated every hour.",

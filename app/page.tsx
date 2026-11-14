@@ -13,6 +13,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CtaLink, StickyCta, TrackView } from "@/components/client";
@@ -26,6 +27,7 @@ import { getDb, schema } from "@/lib/db";
 import { fmt } from "@/lib/format";
 import { ghostIndex, showcaseJobs, siteStats } from "@/lib/stats";
 
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 export const dynamic = "force-dynamic";
 
 async function verifiedReviews() {

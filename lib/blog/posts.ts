@@ -20,6 +20,8 @@ export type Post = {
   published: string;
   readMinutes: number;
   body: Block[];
+  /** Short questions and answers, shown on the page and marked up for search and AI answers. */
+  faq?: { q: string; a: string }[];
 };
 
 export const SOURCES = {
@@ -46,6 +48,16 @@ export const POSTS: Post[] = [
     ],
     published: "2026-11-14",
     readMinutes: 6,
+    faq: [
+      {
+        q: "Is it normal to hear nothing back from job applications?",
+        a: "Yes. In a 2025 CV Genius survey of 625 UK hiring managers, 56 in 100 said they were likely to stop replying to candidates or had no problem doing it. Silence is often how a company runs hiring, not a verdict on you.",
+      },
+      {
+        q: "What is the biggest fixable reason for no replies?",
+        a: "Timing. A Chicago Booth study of 66 million applications found more than half arrive in a job's first 4 days. Applying to roles posted in the last few days puts you in front of a hiring team that is still reading.",
+      },
+    ],
     body: [
       {
         type: "p",
@@ -123,6 +135,16 @@ export const POSTS: Post[] = [
     ],
     published: "2026-11-14",
     readMinutes: 5,
+    faq: [
+      {
+        q: "How long should I wait to hear back after applying?",
+        a: "About two weeks. Employers take applications for about 9 days on average (Chicago Booth), so most shortlists form within a couple of weeks. After three weeks of silence, treat it as a no.",
+      },
+      {
+        q: "Should I follow up on a job application?",
+        a: "Once, 7 to 10 days after applying, if you can find a named person. Say which role, add one line on why you fit, and ask about the timeline.",
+      },
+    ],
     body: [
       {
         type: "p",
@@ -188,6 +210,16 @@ export const POSTS: Post[] = [
     ],
     published: "2026-11-14",
     readMinutes: 5,
+    faq: [
+      {
+        q: "What is the best time to apply for a job?",
+        a: "In the first 4 days after it is posted. A Chicago Booth study of 66 million applications found more than half arrive in that window, and employers take applications for about 9 days on average.",
+      },
+      {
+        q: "Does the day of the week matter when applying?",
+        a: "Much less than the age of the ad. A Tuesday application to a 3-week-old ad is still late. Focus on how many days the role has been live.",
+      },
+    ],
     body: [
       {
         type: "p",
@@ -255,6 +287,16 @@ export const POSTS: Post[] = [
     ],
     published: "2026-11-14",
     readMinutes: 6,
+    faq: [
+      {
+        q: "What does it mean to be ghosted by an employer?",
+        a: "The employer stops replying without telling you where you stand. It can happen after applying, after a screening call or even after a final interview.",
+      },
+      {
+        q: "How long before I know I've been ghosted?",
+        a: "Two weeks after applying, or a week past the date they said they would reply after an interview. Send one follow-up. After three weeks in total with no reply, move on.",
+      },
+    ],
     body: [
       {
         type: "p",
@@ -326,6 +368,16 @@ export const POSTS: Post[] = [
     ],
     published: "2026-11-14",
     readMinutes: 5,
+    faq: [
+      {
+        q: "Is a job posted 30 days ago still open?",
+        a: "Sometimes, but the odds are lower. More than half of applications arrive in a job's first 4 days (Chicago Booth), so a 30-day-old ad has usually seen most of its candidates. Check for a salary, a clear description and recent ads from the same company.",
+      },
+      {
+        q: "How can I check how old a job ad is?",
+        a: "Look for the date on the company's own careers page, not a job board, since boards can show a date that resets when an ad is reposted. Ghostless's free checker shows the age and any warning signs from a link.",
+      },
+    ],
     body: [
       {
         type: "p",
@@ -385,6 +437,222 @@ export const POSTS: Post[] = [
         text: "See which companies are posting new roles right now.",
         href: "/hiring-now",
         label: "Who's hiring now",
+      },
+    ],
+  },
+  {
+    slug: "find-new-jobs-before-linkedin",
+    title: "How to find new jobs before they hit LinkedIn and Indeed",
+    description:
+      "Companies post new roles on their own careers pages first. Where to look, the search tricks that find them, and how to hear about them the hour they go live.",
+    keywords: [
+      "find jobs before linkedin",
+      "search company careers pages",
+      "greenhouse lever ashby job search",
+    ],
+    published: "2026-11-14",
+    readMinutes: 6,
+    faq: [
+      {
+        q: "Where do companies post jobs first?",
+        a: "On their own careers page, which is usually run by a hiring system such as Greenhouse, Lever, Ashby, Workable or SmartRecruiters. Job boards and aggregators can pick a role up later.",
+      },
+      {
+        q: "How do I search Greenhouse or Lever jobs directly?",
+        a: 'Use a Google site search, for example: site:boards.greenhouse.io "product manager" London, or site:jobs.lever.co "data analyst" remote. Add "past 24 hours" in Google\'s Tools menu to see only new pages.',
+      },
+    ],
+    body: [
+      {
+        type: "p",
+        text: "When a company opens a role, the first place it appears is almost always the company's own careers page. Job boards and aggregators can pick it up later, sometimes after the first wave of applicants is already in. If you want to be early, go to the source.",
+      },
+      { type: "h2", text: "Where careers pages actually live" },
+      {
+        type: "p",
+        text: "Most companies don't build their own careers page. They use a hiring system, and each one has a public job board with a predictable address:",
+      },
+      {
+        type: "list",
+        items: [
+          "Greenhouse: boards.greenhouse.io/companyname or job-boards.greenhouse.io/companyname",
+          "Lever: jobs.lever.co/companyname",
+          "Ashby: jobs.ashbyhq.com/companyname",
+          "Workable: apply.workable.com/companyname",
+          "SmartRecruiters: jobs.smartrecruiters.com/companyname",
+        ],
+      },
+      { type: "h2", text: "The Google search trick" },
+      {
+        type: "p",
+        text: 'You can search all of a system\'s boards at once with a site search. Try site:boards.greenhouse.io "marketing manager" London, or site:jobs.ashbyhq.com "software engineer" remote. In Google, open Tools and set the time to "Past 24 hours" to see only pages Google found recently.',
+      },
+      {
+        type: "p",
+        text: "It works, but it's slow. Google doesn't find every new page straight away, and you have to repeat each search for every system and every job title.",
+      },
+      { type: "h2", text: "Make a target list" },
+      {
+        type: "list",
+        items: [
+          "Write down 20 to 40 companies you'd genuinely like to work for.",
+          "Find which hiring system each one uses (open any of their job links and look at the address).",
+          "Bookmark the board and check it on the same days each week.",
+        ],
+      },
+      {
+        type: "cta",
+        text: "Or skip the checking. We read company careers pages every hour across the UK and US and send you the new roles that match.",
+        href: "/start",
+        label: "Get new roles first",
+      },
+      { type: "h2", text: "Why this is worth the effort" },
+      {
+        type: "p",
+        text: "A Chicago Booth study of 66 million applications found more than half arrive in a job's first 4 days. Seeing a role on day one instead of day six changes which half of the pile you're in.",
+      },
+      {
+        type: "cta",
+        text: "See what's been posted on careers pages in the last few days.",
+        href: "/jobs",
+        label: "Browse new jobs",
+      },
+    ],
+  },
+  {
+    slug: "how-to-tell-if-a-job-posting-is-still-open",
+    title: "How to tell if a job posting is still open",
+    description:
+      "Some job ads stay up after the role is filled or paused. Seven signs an ad is still live, seven signs it isn't, and a free way to check any link.",
+    keywords: [
+      "how to tell if a job posting is real",
+      "is this job still open",
+      "how to know if a job posting is old",
+    ],
+    published: "2026-11-14",
+    readMinutes: 5,
+    faq: [
+      {
+        q: "How can I tell if a job ad is still open?",
+        a: "Check when it was first posted on the company's own careers page, whether it shows a salary and a clear description, and whether the company's other ads are recent. Talent-pool wording like 'always looking' is a sign it isn't a live opening.",
+      },
+      {
+        q: "Do companies leave job ads up after the role is filled?",
+        a: "Some do, and others keep 'talent pool' ads open to collect CVs. An ad that has been live for months with no salary and vague wording is worth checking before you apply.",
+      },
+    ],
+    body: [
+      {
+        type: "p",
+        text: "Not every live ad is a live job. Some stay up after the role is filled, some are paused, and some are there to collect CVs for later. You can usually tell in a minute if you know what to look for.",
+      },
+      { type: "h2", text: "Signs the role is open" },
+      {
+        type: "list",
+        items: [
+          "It was posted in the last couple of weeks on the company's own careers page.",
+          "It shows a salary or a salary range.",
+          "It names a team, a manager or a clear set of responsibilities.",
+          "The company's other ads are also recent.",
+          "It's still on the company's own site, not only on a job board.",
+        ],
+      },
+      { type: "h2", text: "Signs it might not be" },
+      {
+        type: "list",
+        items: [
+          "Phrases like 'always looking', 'talent pool', 'future opportunities' or 'register your interest'.",
+          "A very short ad with little about the actual work.",
+          "It has been up for months.",
+          "Most of the company's other ads are also old.",
+          "It disappeared and came back with the same title.",
+        ],
+      },
+      {
+        type: "p",
+        text: "None of these prove anything on their own. A hard-to-fill specialist role can stay open for a long time. But two or three together are a good reason to spend your evening on a different application.",
+      },
+      {
+        type: "cta",
+        text: "Paste any job link and we'll show how long it has been up and which of these signs it has.",
+        href: "/check",
+        label: "Check a job",
+      },
+      { type: "h2", text: "Check the company, not just the ad" },
+      {
+        type: "p",
+        text: "Our company pages show how many roles each employer has live, how old its ads usually are and, once enough members have applied, how often people heard back.",
+      },
+      {
+        type: "cta",
+        text: "See which companies are posting new roles right now.",
+        href: "/hiring-now",
+        label: "Who's hiring now",
+      },
+    ],
+  },
+  {
+    slug: "how-to-find-remote-jobs-uk-us",
+    title: "How to find remote jobs in the UK and US that are actually remote",
+    description:
+      "Where real remote roles are posted, how to spot 'remote' ads that aren't, and the questions to check before you apply.",
+    keywords: [
+      "remote jobs uk",
+      "remote jobs us",
+      "how to find real remote jobs",
+    ],
+    published: "2026-11-14",
+    readMinutes: 5,
+    faq: [
+      {
+        q: "Where can I find remote jobs in the UK?",
+        a: "On companies' own careers pages, where the ad says how remote the role really is. Ghostless lists live remote UK and US roles from those pages, updated every hour.",
+      },
+      {
+        q: "How do I know if a remote job is really remote?",
+        a: "Read the location line and the first paragraphs. Look for country or time-zone limits, required office days, or 'hybrid' anywhere in the ad. Ask in the first call if anything is unclear.",
+      },
+    ],
+    body: [
+      {
+        type: "p",
+        text: "Remote roles get a lot of applicants, because anyone in the country can apply. That makes timing matter even more, and it makes it worth checking that 'remote' means what you think.",
+      },
+      { type: "h2", text: "Three kinds of 'remote'" },
+      {
+        type: "list",
+        items: [
+          "Fully remote: no office days. Often limited to one country or a range of time zones.",
+          "Remote with travel: home-based, with regular trips to an office or to clients.",
+          "Hybrid labelled as remote: a set number of office days each week. Common, and easy to miss.",
+        ],
+      },
+      { type: "h2", text: "What to check in the ad" },
+      {
+        type: "list",
+        items: [
+          "The location line. 'Remote, UK' and 'Remote, US' usually mean you must live in that country.",
+          "Words like 'hybrid', 'office days' or 'travel' anywhere in the text.",
+          "Time zones or working hours.",
+          "Whether the salary changes by location.",
+        ],
+      },
+      {
+        type: "cta",
+        text: "Live remote roles from company careers pages, newest first, updated every hour.",
+        href: "/jobs/remote-uk",
+        label: "Remote jobs in the UK",
+      },
+      { type: "h2", text: "Apply early, especially for remote" },
+      {
+        type: "p",
+        text: "A Chicago Booth study of 66 million applications found more than half arrive in a job's first 4 days. With a whole country able to apply, a remote role's first few days are when a hiring team is still reading every CV.",
+      },
+      {
+        type: "cta",
+        text: "Looking in the US instead?",
+        href: "/jobs/remote-us",
+        label: "Remote jobs in the US",
       },
     ],
   },

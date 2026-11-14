@@ -6,14 +6,14 @@ name: Jobs
 on:
   schedule:
     - cron: "5 * * * *" # every hour: import every board, Workable's last 2 days (a full scan when due), then alerts
-    - cron: "30 4 * * *" # daily: find new employer boards
+    - cron: "30 4 * * *" # daily: find new employer boards, then ping IndexNow
     - cron: "0 9 * * *" # daily: renewal reminders, end pauses
   workflow_dispatch:
     inputs:
       job:
         description: Job to run
         type: choice
-        options: [ingest, full, discover, alerts, reminders, rescore]
+        options: [ingest, full, discover, alerts, reminders, rescore, indexnow]
         default: ingest
 
 concurrency:

@@ -8,6 +8,7 @@ import { MIN_MEMBER_APPS } from "@/lib/ghost/score";
 import { EARLY_DAYS, LATE_DAYS, WINDOW_DAYS } from "@/lib/timing";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/how-we-score" },
   title: "How we judge timing",
   description:
     "How we decide whether a job is worth applying to: when it was posted, the usual application window, and the warning signs. With sources.",

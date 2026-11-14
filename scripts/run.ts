@@ -1,5 +1,5 @@
 /**
- * pnpm job <ingest|full|discover|rescore|alerts|reminders> [board slugs...]
+ * pnpm job <ingest|full|discover|rescore|alerts|reminders|indexnow> [board slugs...]
  * full = ingest with a complete Workable scan (daily). discover = find new employer boards (daily).
  * ingest also sends new-role alerts afterwards when it runs through the server.
  *
@@ -69,6 +69,16 @@ async function inProcess() {
   } else if (job === "discover") {
     const { discoverBoards } = await import("../lib/ingest/discover");
     console.log(JSON.stringify(await discoverBoards(), null, 2));
+    // Once a day, tell Bing and other IndexNow engines the job pages changed.
+    const { submitIndexNow } = await import("../lib/seo/indexnow");
+    console.log(
+      JSON.stringify(
+        await submitIndexNow().catch((e) => ({ error: String(e) })),
+      ),
+    );
+  } else if (job === "indexnow") {
+    const { submitIndexNow } = await import("../lib/seo/indexnow");
+    console.log(JSON.stringify(await submitIndexNow(), null, 2));
   } else if (job === "rescore") {
     const { rescoreOpenJobs } = await import("../lib/ingest/run");
     console.log(`rescored ${await rescoreOpenJobs()} open jobs`);

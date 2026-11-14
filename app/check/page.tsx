@@ -10,6 +10,7 @@ import { siteStats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
+  alternates: { canonical: "/check" },
   title: "Is it worth applying? Free job checker",
   description:
     "Paste any job link or ad and see when it was really posted, whether you'd be early or too late, and any warning signs. Free.",
