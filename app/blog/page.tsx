@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { TrackView } from "@/components/client";
+
 import { Eyebrow, Section, SiteFooter, SiteHeader } from "@/components/site";
 import { card, cx } from "@/components/ui";
 import { POSTS } from "@/lib/blog/posts";
@@ -22,6 +24,7 @@ const date = (iso: string) =>
 export default function BlogIndex() {
   return (
     <main className="glow flex min-h-dvh flex-col">
+      <TrackView name="blog_index_view" />
       <SiteHeader />
       <Section className="max-w-3xl pt-6 pb-16">
         <Eyebrow>Blog</Eyebrow>

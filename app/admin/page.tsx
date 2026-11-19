@@ -117,6 +117,26 @@ export default async function Admin() {
     .where(eq(schema.sourceState.key, "workable_full"))
     .limit(1);
 
+  // Where visits came from: each visitor's first-touch source, and how far they got.
+  const sources = await rows<{
+    source: string;
+    people: number;
+    quiz: number;
+    emails: number;
+  }>(sql`
+    with v as (
+      select coalesce(anon_id, user_id::text) as who,
+        (array_agg(coalesce(props->>'utm_source', props->>'ref', 'direct or unknown') order by created_at))[1] as source,
+        bool_or(name = 'quiz_start') as quiz,
+        bool_or(name = 'email_submit') as email
+      from events where created_at > ${since} group by 1)
+    select source, count(*)::int as people, count(*) filter (where quiz)::int as quiz,
+      count(*) filter (where email)::int as emails
+    from v group by 1 order by 2 desc limit 20`);
+  const entries = await rows<{ entry: string; people: number }>(sql`
+    select coalesce(props->>'entry', props->>'path') as entry, count(distinct coalesce(anon_id, user_id::text))::int as people
+    from events where created_at > ${since} group by 1 order by 2 desc limit 15`);
+
   const top = fn.get("landing_view") || fn.get("quiz_start") || 1;
   const Box = ({
     title,
@@ -158,6 +178,35 @@ export default async function Admin() {
           </tbody>
         </table>
       </Box>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Box title="Where visitors came from">
+          <div className="flex justify-between pb-1 text-[12px] text-faint">
+            <span>Site or utm_source</span>
+            <span>people · quiz · email</span>
+          </div>
+          {sources.map((s) => (
+            <div key={s.source} className="flex justify-between py-1">
+              <span>{s.source}</span>
+              <span className="font-mono">
+                {s.people} · {s.quiz} · {s.emails}
+              </span>
+            </div>
+          ))}
+          {sources.length === 0 && <p className="text-muted">No visits yet.</p>}
+          <p className="mt-2 text-[12px] text-faint">
+            Recorded from 19 Nov. Older visits show as direct or unknown.
+          </p>
+        </Box>
+        <Box title="First page people landed on">
+          {entries.map((e) => (
+            <div key={e.entry} className="flex justify-between py-1">
+              <span className="truncate pr-3">{e.entry}</span>
+              <span className="font-mono">{e.people}</span>
+            </div>
+          ))}
+        </Box>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Box title="Quiz drop-off by screen">

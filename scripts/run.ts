@@ -62,7 +62,12 @@ async function inProcess() {
     const { runIngest } = await import("../lib/ingest/run");
     const { sendAlerts } = await import("../lib/cron");
     // Same as the server route: every import is followed by alerts.
-    const ingest = await runIngest({ only: rest, full: job === "full" });
+    // The database is closed while boards are fetched, so it can sleep.
+    const ingest = await runIngest({
+      only: rest,
+      full: job === "full",
+      releaseWhileFetching: true,
+    });
     console.log(
       JSON.stringify({ ingest, alerts: await sendAlerts() }, null, 2),
     );

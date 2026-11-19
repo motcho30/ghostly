@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { CtaLink } from "@/components/client";
+import { CtaLink, TrackView } from "@/components/client";
 import { breadcrumbs, faqPage, JsonLd } from "@/components/json-ld";
 import { Eyebrow, Section, SiteFooter, SiteHeader } from "@/components/site";
 import { btn, card, cx } from "@/components/ui";
@@ -94,6 +94,7 @@ export default async function BlogPost({ params }: PageProps<"/blog/[slug]">) {
   return (
     <main className="glow flex min-h-dvh flex-col">
       <SiteHeader />
+      <TrackView name="blog_view" props={{ slug: post.slug }} />
       <JsonLd data={jsonLd} />
       <JsonLd
         data={breadcrumbs(siteUrl(), [

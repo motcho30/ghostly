@@ -100,4 +100,20 @@ export function getDb(): Promise<Db> {
   return holder.db;
 }
 
+/**
+ * Close the hosted database connection so the database can go to sleep (Neon
+ * bills for the minutes it is awake). The next getDb() opens a fresh one. Only
+ * for one-off scripts: the web server shares this connection between requests.
+ * A local PGlite database stays open.
+ */
+export async function releaseDb(): Promise<void> {
+  if (!process.env.DATABASE_URL || !holder.db) return;
+  const pending = holder.db;
+  holder.db = undefined;
+  const db = (await pending) as unknown as {
+    $client?: { end?: (o?: { timeout?: number }) => Promise<void> };
+  };
+  await db.$client?.end?.({ timeout: 5 });
+}
+
 export { schema };

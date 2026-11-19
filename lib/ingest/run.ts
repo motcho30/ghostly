@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
 
-import { getDb, schema } from "@/lib/db";
+import { getDb, releaseDb, schema } from "@/lib/db";
 import { scoreGhost } from "@/lib/ghost/score";
 import {
   type Board,
@@ -36,7 +36,12 @@ const {
 
 const CONCURRENCY = 8;
 const REPOST_WINDOW_DAYS = 120;
-/** A full Workable scan (which can close vanished ads) runs at most this often. */
+/**
+ * A full Workable scan (which can close vanished ads) is tried at most this often,
+ * whether or not the last try finished. It reads slowly to avoid Workable's rate
+ * limit, so it takes over an hour; retrying it every hour after a rate limit kept
+ * the job running most of the day.
+ */
 const FULL_SCAN_HOURS = 20;
 /** The daily Workable scan covers ads posted in this many days. */
 const FULL_SCAN_DAYS = 30;
@@ -139,10 +144,19 @@ async function setState(key: string, value: Record<string, unknown>) {
  * is the only Workable run allowed to close ads that vanished.
  */
 export async function runIngest(
-  opts: { only?: string[]; full?: boolean; workable?: boolean } = {},
+  opts: {
+    only?: string[];
+    full?: boolean;
+    workable?: boolean;
+    /**
+     * Close the database while fetching, so a hosted database sleeps through the
+     * slow part. Scripts only: the web server shares one connection.
+     */
+    releaseWhileFetching?: boolean;
+  } = {},
 ): Promise<IngestSummary> {
   const t0 = Date.now();
-  const db = await getDb();
+  let db = await getDb();
   const runStart = new Date();
   const [run] = await db
     .insert(ingestRuns)
@@ -188,19 +202,100 @@ export async function runIngest(
     ms: 0,
   };
 
+  // 1. Read what the fetchers need: each board's company, and the SmartRecruiters
+  //    ads we already hold (so they aren't read again in full).
+  const targets: {
+    board: (typeof boards)[number];
+    companyId: number;
+    known: Set<string>;
+  }[] = [];
   await pool(boards, CONCURRENCY, async (board) => {
-    let postings: Posting[];
     const companyId = await upsertCompany({
       name: board.name,
       ats: board.ats,
       boardSlug: board.slug,
     });
+    const known =
+      board.ats === "smartrecruiters"
+        ? await knownIds(companyId, board.ats)
+        : new Set<string>();
+    targets.push({ board, companyId, known });
+  });
+
+  const useWorkable = opts.workable !== false && !opts.only?.length;
+  let full = false;
+  if (useWorkable) {
+    const last = await getState("workable_full");
+    const tried = await getState("workable_full_attempt");
+    const stamps = [last?.at, tried?.at]
+      .filter((x): x is string => typeof x === "string")
+      .map((x) => new Date(x).getTime());
+    const lastAt = stamps.length ? Math.max(...stamps) : 0;
+    full =
+      Boolean(opts.full) || Date.now() - lastAt > FULL_SCAN_HOURS * 3_600_000;
+    if (full)
+      await setState("workable_full_attempt", { at: runStart.toISOString() });
+  }
+
+  // 2. Fetch everything with the database closed. This is the slow part.
+  if (opts.releaseWhileFetching) await releaseDb();
+  const fetched: {
+    t: (typeof targets)[number];
+    postings?: Posting[];
+    error?: unknown;
+  }[] = [];
+  await pool(targets, CONCURRENCY, async (t) => {
     try {
-      const known = await knownIds(companyId, board.ats);
-      postings = await fetchBoard(board, known);
+      fetched.push({ t, postings: await fetchBoard(t.board, t.known) });
+    } catch (error) {
+      fetched.push({ t, error });
+    }
+  });
+
+  const plan = [
+    { location: "United Kingdom", cc: "GB", days: FULL_SCAN_DAYS },
+    { location: "United States", cc: "US", days: US_FULL_SCAN_DAYS },
+  ] as const;
+  const done: { cc: "GB" | "US"; complete: boolean }[] = [];
+  const scan = {
+    postings: [] as Posting[],
+    pages: 0,
+    complete: true,
+    agenciesSkipped: 0,
+    rateLimited: false,
+  };
+  let workableError: string | null = null;
+  if (useWorkable) {
+    try {
+      // Both countries. The US is much bigger, so its daily scan covers fewer days.
+      for (const c of plan) {
+        const one = await scanWorkable({
+          dayRange: full ? c.days : 2,
+          patient: full,
+          location: c.location,
+        });
+        scan.postings.push(...one.postings);
+        scan.pages += one.pages;
+        scan.agenciesSkipped += one.agenciesSkipped;
+        scan.complete &&= one.complete;
+        done.push({ cc: c.cc, complete: one.complete });
+        if (one.rateLimited) {
+          scan.rateLimited = true;
+          break;
+        }
+      }
     } catch (e) {
+      workableError = e instanceof Error ? e.message : "failed";
+    }
+  }
+
+  // 3. Write it all in one short burst.
+  db = await getDb();
+  await pool(fetched, CONCURRENCY, async ({ t, postings, error }) => {
+    const { board, companyId } = t;
+    if (!postings) {
       summary.boardsFailed++;
-      const gone = e instanceof BoardMissing;
+      const gone = error instanceof BoardMissing;
       summary.failed.push(`${board.ats}:${board.slug}${gone ? " (gone)" : ""}`);
       const fails = board.failCount + 1;
       const retire = gone && fails >= MAX_FAILS;
@@ -241,48 +336,21 @@ export async function runIngest(
     summary.jobsClosed += closed.length;
   });
 
-  if (opts.workable !== false && !opts.only?.length) {
-    const last = await getState("workable_full");
-    const lastAt = typeof last?.at === "string" ? new Date(last.at) : null;
-    const full =
-      opts.full ||
-      !lastAt ||
-      Date.now() - lastAt.getTime() > FULL_SCAN_HOURS * 3_600_000;
+  if (useWorkable) {
+    summary.workable.mode = full ? "full" : "recent";
+    summary.workable.pages = scan.pages;
+    summary.workable.seen = scan.postings.length;
+    summary.workable.complete = scan.complete;
+    summary.workable.agenciesSkipped = scan.agenciesSkipped;
+    if (workableError) summary.failed.push(`workable (${workableError})`);
     try {
-      // Both countries. The US is much bigger, so its daily scan covers fewer days.
-      const plan = [
-        { location: "United Kingdom", cc: "GB", days: FULL_SCAN_DAYS },
-        { location: "United States", cc: "US", days: US_FULL_SCAN_DAYS },
-      ] as const;
-      const done: { cc: "GB" | "US"; complete: boolean }[] = [];
-      const scan = {
-        postings: [] as Posting[],
-        pages: 0,
-        complete: true,
-        agenciesSkipped: 0,
-        rateLimited: false,
-      };
-      for (const c of plan) {
-        const one = await scanWorkable({
-          dayRange: full ? c.days : 2,
-          patient: full,
-          location: c.location,
-        });
-        scan.postings.push(...one.postings);
-        scan.pages += one.pages;
-        scan.agenciesSkipped += one.agenciesSkipped;
-        scan.complete &&= one.complete;
-        done.push({ cc: c.cc, complete: one.complete });
-        if (one.rateLimited) {
-          scan.rateLimited = true;
-          break;
-        }
-      }
       const byCompany = new Map<string, Posting[]>();
       for (const p of scan.postings) {
         const name = p.companyName ?? "Unknown";
         if (isExcludedEmployer(name) || !freshEnough(p, runStart)) continue;
-        byCompany.set(name, [...(byCompany.get(name) ?? []), p]);
+        const list = byCompany.get(name);
+        if (list) list.push(p);
+        else byCompany.set(name, [p]);
       }
       for (const [name, list] of byCompany) {
         const companyId = await upsertCompany({
@@ -309,7 +377,7 @@ export async function runIngest(
           .returning({ id: jobs.id });
         summary.workable.closed += closed.length;
       }
-      if (full && scan.complete) {
+      if (full && scan.complete && !workableError) {
         await setState("workable_full", {
           at: runStart.toISOString(),
           seen: scan.postings.length,
@@ -327,7 +395,9 @@ export async function runIngest(
   }
 
   summary.jobsClosed += await sweep(runStart);
-  await rescoreOpenJobs();
+  // A full rescore reads every open ad's text, so it runs with the daily full
+  // scan. Other runs score only the ads that are new this run.
+  await rescoreOpenJobs(full ? undefined : runStart);
   summary.ms = Date.now() - t0;
   await db
     .update(ingestRuns)
@@ -556,17 +626,20 @@ async function storePostings(
   return { inserted };
 }
 
-/** Recompute every open job's ghost score from its own facts and its company's. */
-export async function rescoreOpenJobs() {
+/**
+ * Recompute open jobs' ghost scores from their own facts and their company's.
+ * With `since`, only ads first seen from then on are rescored, which skips
+ * downloading every ad's text; company figures still use every open ad.
+ */
+export async function rescoreOpenJobs(since?: Date) {
   const db = await getDb();
   const now = new Date();
-  const open = await db
+  const facts = await db
     .select({
       id: jobs.id,
       companyId: jobs.companyId,
       postedAt: jobs.postedAt,
       firstSeenAt: jobs.firstSeenAt,
-      text: jobs.descriptionText,
       salaryMin: jobs.salaryMin,
       repostCount: jobs.repostCount,
     })
@@ -574,13 +647,24 @@ export async function rescoreOpenJobs() {
     .where(isNull(jobs.closedAt));
 
   const stale = new Map<number, { open: number; old: number }>();
-  for (const j of open) {
+  for (const j of facts) {
     const s = stale.get(j.companyId) ?? { open: 0, old: 0 };
     s.open++;
     const at = j.postedAt ?? j.firstSeenAt;
     if (now.getTime() - at.getTime() > 60 * 86_400_000) s.old++;
     stale.set(j.companyId, s);
   }
+  const targets = since ? facts.filter((j) => j.firstSeenAt >= since) : facts;
+  const texts = new Map<number, string>();
+  for (let i = 0; i < targets.length; i += 2_000) {
+    const ids = targets.slice(i, i + 2_000).map((j) => j.id);
+    const rows = await db
+      .select({ id: jobs.id, text: jobs.descriptionText })
+      .from(jobs)
+      .where(inArray(jobs.id, ids));
+    for (const r of rows) texts.set(r.id, r.text);
+  }
+  const open = targets.map((j) => ({ ...j, text: texts.get(j.id) ?? "" }));
   const member = await companyReplyCounts();
 
   const updates = open.map((j) => {
